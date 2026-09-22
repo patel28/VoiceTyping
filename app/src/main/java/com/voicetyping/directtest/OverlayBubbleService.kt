@@ -672,7 +672,7 @@ class OverlayBubbleService : Service() {
         private const val BUBBLE_SIZE_DP = 62
         private const val MOVE_SLOP_DP = 10
         private const val HOLD_TO_RECORD_MS = 250L
-        private const val HOLD_TO_DRAG_MS = 450L
+        private const val HOLD_TO_DRAG_MS = 300L
         private const val MAX_RECORDING_MS = 120_000L
         private const val TAP_COMPLETE_SILENCE_MS = 10_000L
         private const val TAP_POSSIBLE_SILENCE_MS = 7_500L
