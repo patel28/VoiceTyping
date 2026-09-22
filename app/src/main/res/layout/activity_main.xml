@@ -229,6 +229,68 @@
                     android:visibility="gone" />
 
                 <LinearLayout
+                    android:id="@+id/api_key_missing_warning"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_2"
+                    android:background="@drawable/bg_wash_pill"
+                    android:clickable="true"
+                    android:contentDescription="@string/api_key_missing_warning_a11y"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:minHeight="@dimen/touch_min"
+                    android:orientation="horizontal"
+                    android:paddingStart="@dimen/space_3"
+                    android:paddingTop="@dimen/space_2"
+                    android:paddingEnd="@dimen/space_2"
+                    android:paddingBottom="@dimen/space_2">
+
+                    <ImageView
+                        android:layout_width="@dimen/icon_row"
+                        android:layout_height="@dimen/icon_row"
+                        android:contentDescription="@null"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_warning"
+                        app:tint="@color/warning_amber" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_2"
+                        android:layout_weight="1"
+                        android:importantForAccessibility="no"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/api_key_missing_warning_title"
+                            android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue"
+                            android:textColor="@color/warning_amber_text" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/api_key_missing_warning_body"
+                            android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
+                            android:textColor="@color/ink" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/touch_min"
+                        android:gravity="center"
+                        android:importantForAccessibility="no"
+                        android:paddingStart="@dimen/space_2"
+                        android:paddingEnd="@dimen/space_1"
+                        android:text="@string/action_open_settings"
+                        android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue"
+                        android:textColor="@color/signal_blue" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/mode_summary_row"
                     style="@style/Widget.VoiceTyping.Row"
                     android:layout_width="match_parent"

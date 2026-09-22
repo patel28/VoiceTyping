@@ -31,6 +31,12 @@
     <string name="action_stop_bubble">Stop floating mic</string>
     <string name="action_settings">Settings</string>
     <string name="action_back">Back</string>
+    <string name="action_open_settings">Settings</string>
+
+    <!-- Refinement availability -->
+    <string name="api_key_missing_warning_title">Refinement is not configured</string>
+    <string name="api_key_missing_warning_body">No API key is saved. If the local development service is unavailable, raw transcript is copied without grammar, sentence-completion, or contextual refinement.</string>
+    <string name="api_key_missing_warning_a11y">Refinement is not configured. No API key is saved. If the local development service is unavailable, raw transcript is copied without grammar, sentence-completion, or contextual refinement. Open Settings.</string>
 
     <!-- Recording mode summary -->
     <string name="mode_summary">Mode · %1$s</string>

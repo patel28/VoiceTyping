@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var stepGesture: TextView
     private lateinit var privacyBody: TextView
     private lateinit var privacyChevron: ImageView
+    private lateinit var apiKeyMissingWarning: View
     private lateinit var sandboxHelper: TextView
     private var privacyExpanded = false
 
@@ -66,10 +67,12 @@ class MainActivity : AppCompatActivity() {
         stepGesture = findViewById(R.id.step_gesture)
         privacyBody = findViewById(R.id.privacy_body)
         privacyChevron = findViewById(R.id.privacy_chevron)
+        apiKeyMissingWarning = findViewById(R.id.api_key_missing_warning)
         sandboxHelper = findViewById(R.id.sandbox_helper)
 
         findViewById<ImageButton>(R.id.open_settings).setOnClickListener { openSettings() }
         findViewById<LinearLayout>(R.id.mode_summary_row).setOnClickListener { openSettings() }
+        apiKeyMissingWarning.setOnClickListener { openSettings() }
         findViewById<LinearLayout>(R.id.privacy_row).setOnClickListener { togglePrivacy() }
         micAction.setOnClickListener { requestMicrophone() }
         overlayAction.setOnClickListener { openOverlaySettings() }
@@ -112,14 +115,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun refresh() = render(readReadiness())
 
-    private fun readReadiness() = Readiness(
-        micGranted = checkSelfPermission(Manifest.permission.RECORD_AUDIO) ==
-            PackageManager.PERMISSION_GRANTED,
-        overlayGranted = Settings.canDrawOverlays(this),
-        serviceRunning = OverlayBubbleService.isRunning,
-        resultCopied = ClipboardStateStore.read() != null,
-        mode = settingsStore.read().recordingMode,
-    )
+    private fun readReadiness(): Readiness {
+        val settings = settingsStore.read()
+        return Readiness(
+            micGranted = checkSelfPermission(Manifest.permission.RECORD_AUDIO) ==
+                PackageManager.PERMISSION_GRANTED,
+            overlayGranted = Settings.canDrawOverlays(this),
+            serviceRunning = OverlayBubbleService.isRunning,
+            resultCopied = ClipboardStateStore.read() != null,
+            mode = settings.recordingMode,
+            apiKeySaved = settings.apiKey.isNotBlank(),
+        )
+    }
 
     /** Everything the screen is allowed to claim, read once so the views cannot disagree. */
     data class Readiness(
@@ -128,6 +135,7 @@ class MainActivity : AppCompatActivity() {
         val serviceRunning: Boolean,
         val resultCopied: Boolean,
         val mode: RecordingMode,
+        val apiKeySaved: Boolean = false,
     )
 
     @VisibleForTesting
@@ -136,6 +144,7 @@ class MainActivity : AppCompatActivity() {
 
         bindPermissionRow(micIcon, micStatus, micAction, readiness.micGranted)
         bindPermissionRow(overlayIcon, overlayStatus, overlayAction, readiness.overlayGranted)
+        apiKeyMissingWarning.visibility = if (readiness.apiKeySaved) View.GONE else View.VISIBLE
 
         signalRail.render(railStates(ready, readiness.resultCopied))
         bindHeadline(ready, readiness.serviceRunning, readiness.resultCopied)
