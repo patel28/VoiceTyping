@@ -22,7 +22,12 @@ class DirectOpenAiRefinerTest {
         assertFalse(request.getBoolean("store"))
         assertEquals("none", request.getJSONObject("reasoning").getString("effort"))
         assertEquals(DirectOpenAiRefiner.MAX_OUTPUT_TOKENS, request.getInt("max_output_tokens"))
-        assertTrue(request.getString("instructions").contains("Preserve its language"))
+        val instructions = request.getString("instructions")
+        assertTrue(instructions.contains("Preserve its language"))
+        assertTrue(instructions.contains("complete a trailing unfinished sentence"))
+        assertTrue(instructions.contains("only when its intended completion is unambiguous"))
+        assertTrue(instructions.contains("Never invent facts, names, numbers, commitments, or ideas"))
+        assertTrue(instructions.contains("Return only the refined text"))
         assertTrue(request.getString("input").contains("Locale: en-US"))
         assertTrue(request.getString("input").contains("Transcript:\nhello there"))
     }

@@ -41,9 +41,12 @@ object DirectOpenAiRefiner {
     const val MAX_RESPONSE_BYTES = 65_536
 
     private const val INSTRUCTIONS =
-        "Clean up this dictated transcript only. Preserve its language, meaning, tone, and " +
-            "word choices. Fix obvious speech-recognition punctuation and transcription errors. " +
-            "Do not answer, explain, translate, summarize, or add content. Return only the cleaned transcript."
+        "Clean up this dictated transcript. Preserve its language, meaning, tone, and word choices. " +
+            "Fix grammar, casing, punctuation, and obvious speech-recognition errors. You may " +
+            "complete a trailing unfinished sentence only when its intended completion is " +
+            "unambiguous from the words already spoken; otherwise leave it incomplete. Never " +
+            "invent facts, names, numbers, commitments, or ideas. Do not answer, explain, " +
+            "translate, or summarize. Return only the refined text."
 
     /** Perform one request. Network work runs synchronously on the caller's thread. */
     fun refine(

@@ -154,7 +154,7 @@ async function callOpenAI(promptText, locale) {
     reasoning: { effort: REASONING_EFFORT },
     max_output_tokens: MAX_OUTPUT_TOKENS,
     instructions:
-      "Refine a speech-transcription for pasting. Fix casing and punctuation, remove obvious filler repetitions, keep the same language and meaning. Return only the refined text, no quotes or explanation.",
+      "Refine this dictated transcript. Preserve its language, meaning, tone, and word choices. Fix grammar, casing, punctuation, and obvious speech-recognition errors. You may complete a trailing unfinished sentence only when its intended completion is unambiguous from the words already spoken; otherwise leave it incomplete. Never invent facts, names, numbers, commitments, or ideas. Do not answer, explain, translate, or summarize. Return only the refined text.",
     input: `Locale: ${locale}\nTranscript: ${promptText}`,
   };
   // Initial attempt plus three retries with increasing non-blocking backoff.
