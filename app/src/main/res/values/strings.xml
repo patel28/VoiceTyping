@@ -1,6 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">VoiceTyping</string>
+    <string name="main_trust_line">Voice to polished text. Paste anywhere.</string>
+
+    <!-- Readiness instrument -->
+    <string name="state_setup_required">Setup required</string>
+    <string name="state_ready">Ready</string>
+    <string name="state_active">Floating mic active</string>
+    <string name="rail_permission">Permission</string>
+    <string name="rail_ready">Ready</string>
+    <string name="rail_listening">Listening</string>
+    <string name="rail_refining">Refining</string>
+    <string name="rail_copied">Copied</string>
+    <string name="rail_a11y_done">%1$s, complete</string>
+    <string name="rail_a11y_current">%1$s, current step</string>
+    <string name="rail_a11y_ahead">%1$s, not reached yet</string>
+    <string name="rail_a11y_label">Progress rail</string>
+
+    <!-- Permission rows -->
+    <string name="perm_mic_title">Microphone</string>
+    <string name="perm_overlay_title">Display over other apps</string>
+    <string name="perm_ready">Ready</string>
+    <string name="perm_missing">Permission needed</string>
+    <string name="action_allow">Allow</string>
+
+    <!-- Primary and secondary actions -->
+    <string name="action_allow_mic">Allow microphone</string>
+    <string name="action_allow_overlay">Allow display over other apps</string>
+    <string name="action_start_bubble">Start floating mic</string>
+    <string name="action_stop_bubble">Stop floating mic</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_back">Back</string>
+
+    <!-- Recording mode summary -->
+    <string name="mode_summary">Mode · %1$s</string>
+    <string name="mode_hold">Hold and release</string>
+    <string name="mode_tap">Tap to start / tap to stop</string>
+
+    <!-- First-use instruction -->
+    <string name="steps_label">First use</string>
+    <string name="step_focus">Focus a field</string>
+    <string name="step_speak">Speak from the floating mic</string>
+    <string name="step_paste">Paste</string>
+    <string name="step_gesture_hold">Hold the floating mic while you speak, then release.</string>
+    <string name="step_gesture_tap">Tap the floating mic to start, tap again to stop.</string>
+
+    <!-- Privacy disclosure -->
+    <string name="privacy_row_title">What VoiceTyping can see</string>
+    <string name="privacy_body">Microphone and display over other apps. Nothing else: no keyboard service, no accessibility service, no analytics. Speech is transcribed by the Android speech service on this device. Text leaves the device only if you add your own refinement key in Settings.</string>
+
+    <!-- Paste sandbox -->
+    <string name="sandbox_label">Try it here</string>
+    <string name="sandbox_hint">Paste the result of a recording</string>
+    <string name="sandbox_helper_idle">Record from the floating mic, then paste here to check the result.</string>
+    <string name="sandbox_helper_copied">Copied — long-press the field and choose Paste.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_recording_label">Recording control</string>
+    <string name="mode_hold_detail">Hold the floating mic, speak, release to finish.</string>
+    <string name="mode_tap_detail">Tap once to start, tap again to finish.</string>
+    <string name="recording_limit_note">A recording can run for up to 2 minutes. Some Android speech services stop after a long silence.</string>
+    <string name="advanced_title">Advanced: AI refinement</string>
+    <string name="advanced_subtitle">Optional. Recordings are copied as plain transcripts without a key.</string>
+    <string name="api_key_label">API key</string>
+    <string name="api_key_hint">Optional API key</string>
+    <string name="action_show">Show</string>
+    <string name="action_hide">Hide</string>
+    <string name="action_clear">Clear</string>
+    <string name="api_key_warning">Stored encrypted on this device. For production, use a server-managed key.</string>
+    <string name="model_label">Model</string>
+    <string name="action_save">Save changes</string>
+    <string name="save_success">Saved</string>
+    <string name="save_error">API key could not be secured on this device</string>
+    <string name="a11y_expand">Expand</string>
+    <string name="a11y_collapse">Collapse</string>
+    <string name="a11y_gesture_hold_diagram">Diagram: press, hold, release</string>
+    <string name="a11y_gesture_tap_diagram">Diagram: tap once, tap again</string>
+
+    <!-- Foreground service -->
     <string name="bubble_channel_name">VoiceTyping bubble</string>
     <string name="bubble_notification_title">VoiceTyping bubble is active</string>
+    <string name="bubble_notification_text">Use the floating mic to record and copy speech.</string>
+    <string name="bubble_notification_stop">Stop bubble</string>
+
+    <!-- Floating control -->
+    <string name="bubble_a11y_idle_hold">Floating microphone. Hold and release to record.</string>
+    <string name="bubble_a11y_idle_tap">Floating microphone. Tap to start recording.</string>
+    <string name="bubble_a11y_recording_hold">Listening, %1$s. Release to finish.</string>
+    <string name="bubble_a11y_recording_tap">Listening, %1$s. Tap to finish.</string>
+    <string name="bubble_a11y_processing">Refining</string>
+    <string name="bubble_a11y_copied">Copied</string>
+    <string name="bubble_a11y_error">Error. Tap to reset.</string>
+    <string name="bubble_timer_format">%1$d:%2$02d</string>
+    <string name="hint_first_use_hold">Hold and release to record</string>
+    <string name="hint_first_use_tap">Tap to start, tap to stop</string>
+
+    <!-- Drag affordance -->
+    <string name="drag_strip_title">Drop into a text field</string>
+    <string name="drag_strip_detail">Drag works in some apps only. Long-press and Paste always works.</string>
+    <string name="drag_unsupported">Drag not supported here — long-press the field and choose Paste</string>
+
+    <!-- Outcomes and recoverable errors -->
+    <string name="toast_copied">Copied — long-press the field to paste</string>
+    <string name="toast_copied_raw">Refinement unavailable — raw transcript copied</string>
+    <string name="toast_ready_hold">Ready — hold the mic to record</string>
+    <string name="toast_ready_tap">Ready — tap the mic to record</string>
+    <string name="toast_hold_required">Hold the mic to record</string>
+    <string name="error_no_speech">No speech detected — try again</string>
+    <string name="error_speech_unavailable">Speech service unavailable — check Google speech services</string>
+    <string name="error_speech_busy">Speech service busy — try again</string>
+    <string name="error_mic_permission">Microphone permission needed — allow it in VoiceTyping</string>
+    <string name="error_mic_blocked">Microphone unavailable — close other recording apps</string>
+    <string name="error_copy_failed">Copy failed — tap the mic and try again</string>
+    <string name="error_speech_failed">Speech recognition failed — try again</string>
 </resources>

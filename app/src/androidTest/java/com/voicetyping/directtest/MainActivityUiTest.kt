@@ -1,31 +1,55 @@
 package com.voicetyping.directtest
 
+import android.view.View
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
-import androidx.test.espresso.matcher.ViewMatchers.withSubstring
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.hamcrest.Matchers.not
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class MainActivityUiTest {
+
     @Test
-    fun setupScreenShowsReadinessAndSettingsEntryPoint() {
+    fun setupScreenShowsOneReadinessInstrumentAndOnePrimaryAction() {
         ActivityScenario.launch(MainActivity::class.java).use {
-            onView(withText("VoiceTyping")).check(matches(isDisplayed()))
-            onView(withText("Settings")).check(matches(isDisplayed()))
-            onView(withText("Allow microphone")).check(matches(isDisplayed()))
-            onView(withText("Open overlay permission")).check(matches(isDisplayed()))
-            onView(withText("Start floating mic")).check(matches(isDisplayed()))
-            onView(withText("HOW IT WORKS")).check(matches(isDisplayed()))
-            onView(withSubstring("Grant microphone and display-over-other-apps access")).check(matches(isDisplayed()))
-            onView(withText("PRIVACY & REFINEMENT")).check(matches(isDisplayed()))
-            onView(withSubstring("production refinement should use your server")).check(matches(isDisplayed()))
+            onView(withText(R.string.app_name)).check(matches(isDisplayed()))
+            onView(withText(R.string.main_trust_line)).check(matches(isDisplayed()))
+            onView(withId(R.id.open_settings)).check(matches(isDisplayed()))
+
+            // The rail and the two permission rows are the readiness instrument.
+            onView(withId(R.id.signal_rail)).check(matches(isDisplayed()))
+            onView(withText(R.string.perm_mic_title)).check(matches(isDisplayed()))
+            onView(withText(R.string.perm_overlay_title)).check(matches(isDisplayed()))
+
+            // Exactly one primary action, plus the mode summary as a quiet secondary row.
+            onView(withId(R.id.primary_action)).check(matches(isDisplayed()))
+            onView(withId(R.id.mode_summary)).check(matches(isDisplayed()))
+
+            onView(withId(R.id.step_gesture)).perform(scrollTo()).check(matches(isDisplayed()))
+            onView(withText(R.string.sandbox_label)).perform(scrollTo()).check(matches(isDisplayed()))
+            onView(withId(R.id.sandbox_field)).perform(scrollTo()).check(matches(isDisplayed()))
+            onView(withText(R.string.sandbox_helper_idle)).perform(scrollTo())
+                .check(matches(isDisplayed()))
+
+            // This build is not an IME and never claims to insert text by itself.
             onView(withText("Enable / choose VoiceTyping Insert")).check(doesNotExist())
+        }
+    }
+
+    @Test
+    fun privacyExplanationStaysCollapsedUntilTheRowIsOpened() {
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            onView(withId(R.id.privacy_body)).check(matches(not(isDisplayed())))
+            scenario.onActivity { it.findViewById<View>(R.id.privacy_row).performClick() }
+            onView(withId(R.id.privacy_body)).perform(scrollTo()).check(matches(isDisplayed()))
         }
     }
 }

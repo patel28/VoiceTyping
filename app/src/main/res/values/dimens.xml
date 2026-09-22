@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="space_1">4dp</dimen>
+    <dimen name="space_2">8dp</dimen>
+    <dimen name="space_3">12dp</dimen>
+    <dimen name="space_4">16dp</dimen>
+    <dimen name="space_5">20dp</dimen>
+    <dimen name="space_6">24dp</dimen>
+    <dimen name="space_8">32dp</dimen>
+    <dimen name="gutter">20dp</dimen>
+    <dimen name="touch_min">48dp</dimen>
+    <dimen name="hairline">1dp</dimen>
+    <dimen name="radius_surface">14dp</dimen>
+    <dimen name="radius_field">10dp</dimen>
+    <dimen name="bubble_glyph">26dp</dimen>
+    <dimen name="icon_row">22dp</dimen>
+    <dimen name="icon_step">24dp</dimen>
+</resources>

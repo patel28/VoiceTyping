@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/settings_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/settings_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/canvas"
+        android:minHeight="?attr/actionBarSize"
+        app:navigationContentDescription="@string/action_back"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:title="@string/settings_title"
+        app:titleCentered="false"
+        app:titleTextColor="@color/ink" />
+
+    <ScrollView
+        android:id="@+id/settings_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingStart="@dimen/gutter"
+        android:paddingEnd="@dimen/gutter"
+        android:paddingBottom="@dimen/space_6">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/Widget.VoiceTyping.SectionLabel"
+                android:layout_marginTop="@dimen/space_2"
+                android:layout_marginBottom="@dimen/space_3"
+                android:text="@string/settings_recording_label" />
+
+            <RadioGroup
+                android:id="@+id/mode_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/mode_hold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_mode_option"
+                    android:buttonTint="@color/signal_blue"
+                    android:drawableEnd="@drawable/ic_gesture_hold"
+                    android:drawablePadding="@dimen/space_3"
+                    android:minHeight="@dimen/touch_min"
+                    android:paddingStart="@dimen/space_3"
+                    android:paddingTop="@dimen/space_3"
+                    android:paddingEnd="@dimen/space_3"
+                    android:paddingBottom="@dimen/space_3"
+                    android:textAppearance="@style/TextAppearance.VoiceTyping.Body" />
+
+                <RadioButton
+                    android:id="@+id/mode_tap"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_2"
+                    android:background="@drawable/bg_mode_option"
+                    android:buttonTint="@color/signal_blue"
+                    android:drawableEnd="@drawable/ic_gesture_tap"
+                    android:drawablePadding="@dimen/space_3"
+                    android:minHeight="@dimen/touch_min"
+                    android:paddingStart="@dimen/space_3"
+                    android:paddingTop="@dimen/space_3"
+                    android:paddingEnd="@dimen/space_3"
+                    android:paddingBottom="@dimen/space_3"
+                    android:textAppearance="@style/TextAppearance.VoiceTyping.Body" />
+            </RadioGroup>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_3"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_marginTop="2dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_info"
+                    app:tint="@color/ink_muted" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_2"
+                    android:layout_weight="1"
+                    android:text="@string/recording_limit_note"
+                    android:textAppearance="@style/TextAppearance.VoiceTyping.Caption" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/hairline"
+                android:layout_marginTop="@dimen/space_5"
+                android:background="@color/hairline" />
+
+            <!-- Advanced: AI refinement. Collapsed by default; refinement is optional. -->
+            <LinearLayout
+                android:id="@+id/advanced_row"
+                style="@style/Widget.VoiceTyping.Row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_3"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/advanced_title"
+                        android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/advanced_subtitle"
+                        android:textAppearance="@style/TextAppearance.VoiceTyping.Caption" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/advanced_chevron"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center_vertical"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_chevron_down"
+                    app:tint="@color/ink_muted" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/advanced_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="@dimen/space_3"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:labelFor="@id/api_key_field"
+                    android:text="@string/api_key_label"
+                    android:textAppearance="@style/TextAppearance.VoiceTyping.SectionLabel" />
+
+                <EditText
+                    android:id="@+id/api_key_field"
+                    style="@style/Widget.VoiceTyping.Field"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_2"
+                    android:hint="@string/api_key_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="textPassword"
+                    android:maxLines="1" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/api_key_visibility"
+                        style="@style/Widget.VoiceTyping.Button.Inline"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/action_show" />
+
+                    <Button
+                        android:id="@+id/api_key_clear"
+                        style="@style/Widget.VoiceTyping.Button.Inline"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/action_clear" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_1"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginTop="2dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_warning"
+                        app:tint="@color/warning_amber_text" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_2"
+                        android:layout_weight="1"
+                        android:text="@string/api_key_warning"
+                        android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
+                        android:textColor="@color/warning_amber_text" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_4"
+                    android:labelFor="@id/model_field"
+                    android:text="@string/model_label"
+                    android:textAppearance="@style/TextAppearance.VoiceTyping.SectionLabel" />
+
+                <EditText
+                    android:id="@+id/model_field"
+                    style="@style/Widget.VoiceTyping.Field"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_2"
+                    android:importantForAutofill="no"
+                    android:inputType="text"
+                    android:maxLines="1" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/save_action"
+                style="@style/Widget.VoiceTyping.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_6"
+                android:text="@string/action_save" />
+
+            <LinearLayout
+                android:id="@+id/save_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_2"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal"
+                android:visibility="invisible">
+
+                <ImageView
+                    android:id="@+id/save_status_icon"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="center_vertical"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_check"
+                    app:tint="@color/success_mint" />
+
+                <TextView
+                    android:id="@+id/save_status_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="@dimen/space_2"
+                    android:text="@string/save_success"
+                    android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
+                    android:textColor="@color/success_mint" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

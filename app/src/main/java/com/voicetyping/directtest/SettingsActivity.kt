@@ -1,136 +1,209 @@
 package com.voicetyping.directtest
 
+import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.os.Bundle
-import android.text.InputType
-import android.text.method.PasswordTransformationMethod
+import android.text.Spannable
+import android.text.SpannableStringBuilder
 import android.text.method.HideReturnsTransformationMethod
-import android.view.Gravity
+import android.text.method.PasswordTransformationMethod
+import android.text.style.ForegroundColorSpan
+import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.ScrollView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
+import androidx.core.widget.TextViewCompat
+import com.google.android.material.appbar.MaterialToolbar
 
-/** Private, explicit controls for the only two supported recording experiences. */
+/** Recording control, plus optional AI refinement kept behind a collapsed advanced section. */
 class SettingsActivity : AppCompatActivity() {
+
     private lateinit var store: AppSettingsStore
+    private lateinit var modeGroup: RadioGroup
+    private lateinit var holdOption: RadioButton
+    private lateinit var tapOption: RadioButton
     private lateinit var apiKeyField: EditText
     private lateinit var modelField: EditText
-    private lateinit var modeGroup: RadioGroup
+    private lateinit var visibilityButton: Button
+    private lateinit var advancedContent: LinearLayout
+    private lateinit var advancedChevron: ImageView
+    private lateinit var saveStatus: LinearLayout
+    private lateinit var saveStatusIcon: ImageView
+    private lateinit var saveStatusText: TextView
     private var apiKeyVisible = false
+    private var advancedExpanded = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         store = AppSettingsStore(this)
+        setContentView(R.layout.activity_settings)
+
+        modeGroup = findViewById(R.id.mode_group)
+        holdOption = findViewById(R.id.mode_hold)
+        tapOption = findViewById(R.id.mode_tap)
+        apiKeyField = findViewById(R.id.api_key_field)
+        modelField = findViewById(R.id.model_field)
+        visibilityButton = findViewById(R.id.api_key_visibility)
+        advancedContent = findViewById(R.id.advanced_content)
+        advancedChevron = findViewById(R.id.advanced_chevron)
+        saveStatus = findViewById(R.id.save_status)
+        saveStatusIcon = findViewById(R.id.save_status_icon)
+        saveStatusText = findViewById(R.id.save_status_text)
+
+        findViewById<MaterialToolbar>(R.id.settings_toolbar).setNavigationOnClickListener { finish() }
+
+        holdOption.text = optionText(R.string.mode_hold, R.string.mode_hold_detail)
+        holdOption.contentDescription = optionContentDescription(
+            R.string.mode_hold,
+            R.string.mode_hold_detail,
+            R.string.a11y_gesture_hold_diagram,
+        )
+        tapOption.text = optionText(R.string.mode_tap, R.string.mode_tap_detail)
+        tapOption.contentDescription = optionContentDescription(
+            R.string.mode_tap,
+            R.string.mode_tap_detail,
+            R.string.a11y_gesture_tap_diagram,
+        )
+        tintDiagram(holdOption)
+        tintDiagram(tapOption)
+
         val settings = store.read()
-        val density = resources.displayMetrics.density
-        fun dp(value: Int) = (value * density).toInt()
-        fun text(value: String, size: Float, color: Int = R.color.ink) = TextView(this).apply {
-            this.text = value; textSize = size; setTextColor(getColor(color))
-        }
-        fun card(): LinearLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL; setPadding(dp(18), dp(16), dp(18), dp(16))
-            background = android.graphics.drawable.GradientDrawable().apply {
-                setColor(getColor(R.color.white)); cornerRadius = dp(18).toFloat()
-            }
-        }
-        fun margin(bottom: Int) = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(bottom) }
+        modeGroup.check(
+            if (settings.recordingMode == RecordingMode.TAP_TO_TOGGLE) tapOption.id else holdOption.id,
+        )
+        modeGroup.setOnCheckedChangeListener { _, _ -> hideSaveStatus() }
 
-        val page = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL; setPadding(dp(20), dp(18), dp(20), dp(28))
-            setBackgroundColor(getColor(R.color.surface))
-        }
-        page.addView(text("Settings", 28f).apply { setTypeface(typeface, Typeface.BOLD) }, margin(4))
-        page.addView(text("Control how VoiceTyping records and refines speech.", 14f).apply {
-            alpha = .68f; setPadding(0, 0, 0, dp(18))
-        }, margin(8))
+        apiKeyField.setText(settings.apiKey)
+        apiKeyField.transformationMethod = PasswordTransformationMethod.getInstance()
+        modelField.hint = AppSettings.DEFAULT_REFINEMENT_MODEL
+        modelField.setText(settings.refinementModel)
 
-        val recordingCard = card()
-        recordingCard.addView(text("Recording mode", 17f).apply { setTypeface(typeface, Typeface.BOLD) })
-        recordingCard.addView(text("Choose the interaction that feels most natural.", 13f).apply {
-            alpha = .7f; setPadding(0, dp(4), 0, dp(8))
-        })
-        modeGroup = RadioGroup(this).apply { orientation = RadioGroup.VERTICAL }
-        fun modeButton(label: String, description: String, mode: RecordingMode) = RadioButton(this).apply {
-            id = View.generateViewId(); tag = mode; text = "$label\n$description"; textSize = 15f
-            setTextColor(getColor(R.color.ink)); setPadding(0, dp(7), 0, dp(7))
+        visibilityButton.setOnClickListener { toggleApiKeyVisibility() }
+        findViewById<Button>(R.id.api_key_clear).setOnClickListener {
+            apiKeyField.setText("")
+            store.clearApiKey()
+            hideSaveStatus()
         }
-        val hold = modeButton("Hold to record", "Hold the floating mic while speaking; release to finish.", RecordingMode.HOLD_TO_RECORD)
-        val tap = modeButton("Tap to toggle", "Tap once to start recording and once again to finish.", RecordingMode.TAP_TO_TOGGLE)
-        modeGroup.addView(hold); modeGroup.addView(tap)
-        modeGroup.check(if (settings.recordingMode == RecordingMode.HOLD_TO_RECORD) hold.id else tap.id)
-        recordingCard.addView(modeGroup)
-        page.addView(recordingCard, margin(12))
+        findViewById<LinearLayout>(R.id.advanced_row).setOnClickListener { toggleAdvanced() }
+        findViewById<Button>(R.id.save_action).setOnClickListener { save() }
 
-        val refineCard = card()
-        refineCard.addView(text("Refinement", 17f).apply { setTypeface(typeface, Typeface.BOLD) })
-        refineCard.addView(text("Optional personal configuration for text refinement.", 13f).apply {
-            alpha = .7f; setPadding(0, dp(4), 0, dp(10))
-        })
-        refineCard.addView(text("API key", 13f).apply { setTypeface(typeface, Typeface.BOLD) })
-        apiKeyField = EditText(this).apply {
-            hint = "Optional API key"; setText(settings.apiKey)
-            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-            transformationMethod = PasswordTransformationMethod.getInstance()
-            setSingleLine(true); setPadding(dp(14), dp(8), dp(14), dp(8))
-            contentDescription = "API key"
-        }
-        refineCard.addView(apiKeyField, margin(6))
-        val keyActions = LinearLayout(this).apply { gravity = Gravity.END; orientation = LinearLayout.HORIZONTAL }
-        keyActions.addView(Button(this).apply { text = "Show"; isAllCaps = false; setOnClickListener { toggleApiKeyVisibility(this) } })
-        keyActions.addView(Button(this).apply { text = "Clear"; isAllCaps = false; setOnClickListener {
-            apiKeyField.setText(""); store.clearApiKey()
-        } })
-        refineCard.addView(keyActions, margin(4))
-        refineCard.addView(text("Your key is encrypted on this device and sent only to OpenAI. Direct mobile keys can still be extracted from a compromised device; production accounts should use a server.", 12f, R.color.warning_amber).apply {
-            setPadding(0, dp(4), 0, dp(14))
-        })
-        refineCard.addView(text("Refinement model", 13f).apply { setTypeface(typeface, Typeface.BOLD) })
-        modelField = EditText(this).apply {
-            hint = AppSettings.DEFAULT_REFINEMENT_MODEL; setText(settings.refinementModel)
-            inputType = InputType.TYPE_CLASS_TEXT; setSingleLine(true)
-            contentDescription = "Refinement model"
-        }
-        refineCard.addView(modelField)
-        page.addView(refineCard, margin(18))
-
-        page.addView(Button(this).apply {
-            text = "Save settings"; isAllCaps = false; setTextColor(getColor(R.color.white))
-            backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.signal_blue))
-            setOnClickListener {
-                if (save()) {
-                    Toast.makeText(this@SettingsActivity, "Settings saved", Toast.LENGTH_SHORT).show()
-                    finish()
-                } else {
-                    Toast.makeText(this@SettingsActivity, "API key could not be secured on this device", Toast.LENGTH_LONG).show()
-                }
-            }
-        })
-        setContentView(ScrollView(this).apply { addView(page) })
+        applyEdgeToEdgeInsets()
+        applyAdvancedExpansion()
     }
 
-    override fun onPause() { save(); super.onPause() }
+    private fun applyEdgeToEdgeInsets() {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val root = findViewById<LinearLayout>(R.id.settings_root)
+        val toolbar = findViewById<MaterialToolbar>(R.id.settings_toolbar)
+        val scroll = findViewById<ScrollView>(R.id.settings_scroll)
+        val toolbarTop = toolbar.paddingTop
+        val scrollBottom = scroll.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
+            val bars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout(),
+            )
+            val keyboard = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+            view.updatePadding(left = bars.left, right = bars.right)
+            toolbar.updatePadding(top = toolbarTop + bars.top)
+            scroll.updatePadding(bottom = scrollBottom + maxOf(bars.bottom, keyboard))
+            insets
+        }
+    }
 
-    private fun toggleApiKeyVisibility(button: Button) {
+    /** Title in bold over a smaller, muted detail line: one label, one radio, one tap target. */
+    private fun optionText(titleRes: Int, detailRes: Int): CharSequence {
+        val title = getString(titleRes)
+        val detail = getString(detailRes)
+        return SpannableStringBuilder("$title\n$detail").apply {
+            setSpan(StyleSpan(Typeface.BOLD), 0, title.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            val detailStart = title.length + 1
+            setSpan(
+                RelativeSizeSpan(0.84f),
+                detailStart,
+                length,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
+            )
+            setSpan(
+                ForegroundColorSpan(getColor(R.color.ink_muted)),
+                detailStart,
+                length,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
+            )
+        }
+    }
+
+    private fun optionContentDescription(titleRes: Int, detailRes: Int, diagramRes: Int) =
+        "${getString(titleRes)}. ${getString(detailRes)} ${getString(diagramRes)}"
+
+    private fun tintDiagram(option: RadioButton) {
+        TextViewCompat.setCompoundDrawableTintList(option, ColorStateList.valueOf(getColor(R.color.ink)))
+    }
+
+    private fun toggleApiKeyVisibility() {
         apiKeyVisible = !apiKeyVisible
-        apiKeyField.transformationMethod = if (apiKeyVisible) HideReturnsTransformationMethod.getInstance()
-        else PasswordTransformationMethod.getInstance()
+        apiKeyField.transformationMethod = if (apiKeyVisible) {
+            HideReturnsTransformationMethod.getInstance()
+        } else {
+            PasswordTransformationMethod.getInstance()
+        }
         apiKeyField.setSelection(apiKeyField.length())
-        button.text = if (apiKeyVisible) "Hide" else "Show"
+        visibilityButton.setText(if (apiKeyVisible) R.string.action_hide else R.string.action_show)
     }
 
-    private fun save(): Boolean {
-        val selected = modeGroup.findViewById<RadioButton>(modeGroup.checkedRadioButtonId)
-        return store.save(AppSettings(
-            recordingMode = selected?.tag as? RecordingMode ?: RecordingMode.HOLD_TO_RECORD,
-            apiKey = apiKeyField.text.toString(),
-            refinementModel = modelField.text.toString(),
-        ))
+    private fun toggleAdvanced() {
+        advancedExpanded = !advancedExpanded
+        applyAdvancedExpansion()
+    }
+
+    private fun applyAdvancedExpansion() {
+        advancedContent.visibility = if (advancedExpanded) View.VISIBLE else View.GONE
+        advancedChevron.rotation = if (advancedExpanded) 180f else 0f
+        findViewById<LinearLayout>(R.id.advanced_row).contentDescription = getString(
+            R.string.advanced_title,
+        ) + ", " + getString(if (advancedExpanded) R.string.a11y_collapse else R.string.a11y_expand)
+    }
+
+    /** Explicit save with inline feedback; nothing is written silently on the way out. */
+    private fun save() {
+        val mode = if (modeGroup.checkedRadioButtonId == tapOption.id) {
+            RecordingMode.TAP_TO_TOGGLE
+        } else {
+            RecordingMode.HOLD_TO_RECORD
+        }
+        val saved = store.save(
+            AppSettings(
+                recordingMode = mode,
+                apiKey = apiKeyField.text.toString(),
+                refinementModel = modelField.text.toString(),
+            ),
+        )
+        showSaveStatus(saved)
+    }
+
+    private fun showSaveStatus(saved: Boolean) {
+        val message = getString(if (saved) R.string.save_success else R.string.save_error)
+        val color = getColor(if (saved) R.color.success_mint else R.color.recording_coral)
+        saveStatusIcon.setImageResource(if (saved) R.drawable.ic_check else R.drawable.ic_warning)
+        saveStatusIcon.imageTintList = ColorStateList.valueOf(color)
+        saveStatusText.text = message
+        saveStatusText.setTextColor(color)
+        saveStatus.visibility = View.VISIBLE
+        saveStatus.announceForAccessibility(message)
+    }
+
+    private fun hideSaveStatus() {
+        saveStatus.visibility = View.INVISIBLE
     }
 }

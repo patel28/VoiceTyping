@@ -1,12 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.VoiceTyping" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="Theme.VoiceTyping" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/signal_blue</item>
+        <item name="colorOnPrimary">@color/on_accent</item>
         <item name="colorSecondary">@color/success_mint</item>
-        <item name="android:fontFamily">sans</item>
+        <item name="colorOnSecondary">@color/on_accent</item>
+        <item name="colorError">@color/recording_coral</item>
         <item name="android:colorAccent">@color/signal_blue</item>
-        <item name="android:navigationBarColor">@color/surface</item>
-        <item name="android:statusBarColor">@color/surface</item>
+        <item name="android:colorBackground">@color/canvas</item>
+        <item name="android:windowBackground">@color/canvas</item>
+        <item name="android:textColorPrimary">@color/ink</item>
+        <item name="android:textColorSecondary">@color/ink_muted</item>
+        <item name="android:textColorHint">@color/ink_muted</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <!-- Edge-to-edge: the activities apply the real insets as padding. -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:enforceStatusBarContrast">false</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
     </style>
 </resources>

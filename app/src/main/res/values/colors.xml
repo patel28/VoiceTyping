@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Field-recorder palette. Night variants live in values-night/colors.xml. -->
     <color name="ink">#15191F</color>
-    <color name="surface">#F5F7FA</color>
+    <color name="ink_muted">#A315191F</color>
+    <color name="canvas">#F5F7FA</color>
+    <color name="surface_raised">#FFFFFF</color>
+    <color name="hairline">#1F15191F</color>
     <color name="signal_blue">#2864DC</color>
+    <color name="signal_blue_wash">#142864DC</color>
     <color name="recording_coral">#E75555</color>
     <color name="success_mint">#2A9D72</color>
+    <!-- Indicator fill only: 3.29:1 on canvas passes for icons and large text, not body copy. -->
+    <color name="warning_amber">#B7791F</color>
+    <!-- Body copy variant: 6.0:1 on canvas. -->
+    <color name="warning_amber_text">#8A5700</color>
+    <color name="on_accent">#FFFFFF</color>
     <color name="white">#FFFFFF</color>
-    <color name="warning_amber">#8A5700</color>
 </resources>

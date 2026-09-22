@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/first_use_hint"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_first_use_hint"
+    android:paddingStart="@dimen/space_3"
+    android:paddingTop="@dimen/space_2"
+    android:paddingEnd="@dimen/space_3"
+    android:paddingBottom="@dimen/space_2"
+    android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
+    android:textColor="@color/white" />

@@ -13,10 +13,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
-import android.content.res.ColorStateList
-import android.graphics.Color
 import android.graphics.PixelFormat
-import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -29,24 +26,26 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
-import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.widget.AppCompatTextView
+import androidx.annotation.StringRes
+import androidx.core.content.edit
 import androidx.core.content.ContextCompat
 import java.util.Locale
 
 /** Visible recording shortcut. Transcribes with SpeechRecognizer, refines, then copies. */
-@SuppressLint("ClickableViewAccessibility", "SetTextI18n")
+@SuppressLint("ClickableViewAccessibility", "InflateParams")
 class OverlayBubbleService : Service() {
     private val mainHandler = Handler(Looper.getMainLooper())
     private lateinit var windowManager: WindowManager
     private lateinit var appSettingsStore: AppSettingsStore
-    private var bubble: TextView? = null
+    private var bubble: BubbleControlView? = null
     private var dragGuide: View? = null
+    private var firstUseHint: View? = null
     private var copiedDragInProgress = false
     private var state = BubbleFlowState.IDLE
     private var speechRecognizer: SpeechRecognizer? = null
@@ -55,7 +54,6 @@ class OverlayBubbleService : Service() {
     private var lastPartial: String? = null
     private var recordingStartedAt = 0L
     private var recordingSessionMode = RecordingMode.HOLD_TO_RECORD
-    private var processingFrame = 0
     private var refineThread: Thread? = null
 
     private val recordingTick = object : Runnable {
@@ -68,15 +66,6 @@ class OverlayBubbleService : Service() {
         }
     }
 
-    private val processingTick = object : Runnable {
-        override fun run() {
-            if (state != BubbleFlowState.PROCESSING) return
-            processingFrame = (processingFrame + 1) % 3
-            updateBubbleAppearance()
-            mainHandler.postDelayed(this, PROCESSING_TICK_MS)
-        }
-    }
-
     private val finalResultTimeout = Runnable {
         if (state != BubbleFlowState.PROCESSING || finalDelivered) return@Runnable
         val fallback = lastPartial?.trim()?.takeIf { it.isNotEmpty() }
@@ -84,7 +73,7 @@ class OverlayBubbleService : Service() {
             finalDelivered = true
             startRefinementAndCopy(fallback)
         } else {
-            setError("No speech recognized. Try again.")
+            setError(R.string.error_no_speech)
         }
     }
 
@@ -109,13 +98,11 @@ class OverlayBubbleService : Service() {
             val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
             val transcript = SpeechTranscripts.pickBest(matches) ?: lastPartial?.trim()?.takeIf { it.isNotEmpty() }
             if (transcript.isNullOrEmpty()) {
-                setError("No speech recognized. Try again.")
+                setError(R.string.error_no_speech)
             } else {
                 if (state != BubbleFlowState.PROCESSING) {
                     state = BubbleFlowState.PROCESSING
-                    processingFrame = 0
                     updateBubbleAppearance()
-                    mainHandler.post(processingTick)
                 }
                 startRefinementAndCopy(transcript)
             }
@@ -172,18 +159,7 @@ class OverlayBubbleService : Service() {
 
     private fun attachBubble() {
         if (bubble != null) return
-        val view = object : AppCompatTextView(this) {
-            override fun performClick(): Boolean {
-                super.performClick()
-                return true
-            }
-        }.apply {
-            gravity = Gravity.CENTER
-            setTextColor(Color.WHITE)
-            typeface = Typeface.DEFAULT_BOLD
-            setBackgroundResource(android.R.drawable.btn_default)
-            elevation = dp(8).toFloat()
-        }
+        val view = BubbleControlView(this)
         val params = WindowManager.LayoutParams(
             dp(BUBBLE_SIZE_DP),
             dp(BUBBLE_SIZE_DP),
@@ -201,6 +177,7 @@ class OverlayBubbleService : Service() {
             bubble = view
             state = if (ClipboardStateStore.read() != null) BubbleFlowState.COPIED else BubbleFlowState.IDLE
             updateBubbleAppearance()
+            if (state == BubbleFlowState.IDLE) showFirstUseHintIfNeeded(params)
         } catch (_: SecurityException) {
             stopSelf()
         } catch (_: WindowManager.BadTokenException) {
@@ -208,7 +185,7 @@ class OverlayBubbleService : Service() {
         }
     }
 
-    private fun installTouchFlow(view: TextView, params: WindowManager.LayoutParams) {
+    private fun installTouchFlow(view: BubbleControlView, params: WindowManager.LayoutParams) {
         var downX = 0
         var downY = 0
         var rawX = 0f
@@ -237,7 +214,7 @@ class OverlayBubbleService : Service() {
                 copiedDragInProgress = true
                 showCopiedDragGuide()
             } else {
-                showToast("Drag is not supported here. Use Paste instead.")
+                showToast(R.string.drag_unsupported)
             }
         }
 
@@ -264,6 +241,7 @@ class OverlayBubbleService : Service() {
                     dragStarted = false
                     gestureMode = currentRecordingMode()
                     view.isPressed = true
+                    if (state == BubbleFlowState.IDLE) view.setArmed(true)
                     when (state) {
                         BubbleFlowState.IDLE -> if (RecordingGestureRules.shouldArmHold(gestureMode, state)) {
                             view.postDelayed(beginRecording, HOLD_TO_RECORD_MS)
@@ -295,6 +273,7 @@ class OverlayBubbleService : Service() {
                     view.removeCallbacks(beginRecording)
                     view.removeCallbacks(beginCopiedDrag)
                     view.isPressed = false
+                    view.setArmed(false)
                     when {
                         RecordingGestureRules.shouldStopOnRelease(state) -> finishRecordingAndProcess()
                         state == BubbleFlowState.COPIED && !moved && !dragStarted &&
@@ -306,7 +285,7 @@ class OverlayBubbleService : Service() {
                             if (RecordingGestureRules.shouldStartOnRelease(gestureMode, state, moved)) {
                                 startRecording(gestureMode)
                             }
-                            else showToast("Hold the button to record")
+                            else showToast(R.string.toast_hold_required)
                         }
                     }
                     if (!copiedDragInProgress) dragStarted = false
@@ -320,34 +299,13 @@ class OverlayBubbleService : Service() {
 
     /**
      * This window is deliberately NOT_TOUCHABLE: it is a visual affordance only, so Android
-     * continues to deliver global drag/drop events to the app underneath it. A full-screen
-     * dimmer necessarily obscures the destination visually, but it cannot receive focus or
-     * become a drop target.
+     * continues to deliver global drag/drop events to the app underneath it. It shades the screen
+     * edges only, so the destination field the user is aiming at stays readable, and it can
+     * neither receive focus nor become a drop target.
      */
     private fun showCopiedDragGuide() {
         if (dragGuide != null) return
-        val guide = FrameLayout(this).apply {
-            setBackgroundColor(Color.BLACK)
-            isClickable = false
-            isFocusable = false
-            addView(AppCompatTextView(context).apply {
-                gravity = Gravity.CENTER
-                setTextColor(Color.WHITE)
-                typeface = Typeface.DEFAULT_BOLD
-                textSize = 19f
-                text = "Drop into a chat or text field\nRelease to paste"
-                compoundDrawablePadding = dp(18)
-                setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_chat_paste, 0, 0)
-                contentDescription = "Drag guidance: drop into a chat or text field to paste"
-            }, FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                Gravity.CENTER,
-            ).apply {
-                leftMargin = dp(28)
-                rightMargin = dp(28)
-            })
-        }
+        val guide = LayoutInflater.from(this).inflate(R.layout.overlay_drag_strip, null)
         val guideParams = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT,
@@ -358,7 +316,6 @@ class OverlayBubbleService : Service() {
             PixelFormat.TRANSLUCENT,
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            alpha = DRAG_GUIDE_ALPHA
         }
         runCatching {
             windowManager.addView(guide, guideParams)
@@ -372,19 +329,58 @@ class OverlayBubbleService : Service() {
         runCatching { windowManager.removeView(guide) }
     }
 
+    /** The gesture hint appears beside the control on first use only, then never again. */
+    private fun showFirstUseHintIfNeeded(bubbleParams: WindowManager.LayoutParams) {
+        val preferences = getSharedPreferences(UI_PREFERENCES_NAME, MODE_PRIVATE)
+        if (preferences.getBoolean(KEY_FIRST_USE_HINT_SHOWN, false)) return
+        preferences.edit { putBoolean(KEY_FIRST_USE_HINT_SHOWN, true) }
+        val hint = LayoutInflater.from(this).inflate(R.layout.overlay_first_use_hint, null) as TextView
+        hint.setText(
+            if (currentRecordingMode() == RecordingMode.TAP_TO_TOGGLE) {
+                R.string.hint_first_use_tap
+            } else {
+                R.string.hint_first_use_hold
+            },
+        )
+        val hintParams = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+            PixelFormat.TRANSLUCENT,
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            x = bubbleParams.x + dp(BUBBLE_SIZE_DP) + dp(8)
+            y = bubbleParams.y + dp(14)
+        }
+        runCatching {
+            windowManager.addView(hint, hintParams)
+            firstUseHint = hint
+        }
+        mainHandler.postDelayed(Runnable { removeFirstUseHint() }, FIRST_USE_HINT_MS)
+    }
+
+    private fun removeFirstUseHint() {
+        val hint = firstUseHint ?: return
+        firstUseHint = null
+        runCatching { windowManager.removeView(hint) }
+    }
+
     private fun startRecording(mode: RecordingMode = currentRecordingMode()) {
         if (state != BubbleFlowState.IDLE) return
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            setError("Microphone permission is required")
+            setError(R.string.error_mic_permission)
             return
         }
         if (!SpeechRecognizer.isRecognitionAvailable(this)) {
-            setError("Speech recognition is unavailable")
+            setError(R.string.error_speech_unavailable)
             return
         }
         val recognizer = createSpeechRecognizerOrNull()
         if (recognizer == null) {
-            setError("Could not start speech recognition")
+            setError(R.string.error_speech_unavailable)
             return
         }
         val intent = buildRecognizerIntent(mode)
@@ -398,15 +394,15 @@ class OverlayBubbleService : Service() {
             recognizer.startListening(intent)
         } catch (_: SecurityException) {
             destroyRecognizer()
-            setError("Microphone access was blocked")
+            setError(R.string.error_mic_blocked)
             return
         } catch (_: IllegalStateException) {
             destroyRecognizer()
-            setError("Could not start the microphone")
+            setError(R.string.error_mic_blocked)
             return
         } catch (_: IllegalArgumentException) {
             destroyRecognizer()
-            setError("Speech recognition is unavailable")
+            setError(R.string.error_speech_unavailable)
             return
         }
         recordingStartedAt = SystemClock.elapsedRealtime()
@@ -459,9 +455,7 @@ class OverlayBubbleService : Service() {
         runCatching { speechRecognizer?.stopListening() }
         state = BubbleFlowRules.release(state)
         waitingForFinal = true
-        processingFrame = 0
         updateBubbleAppearance()
-        mainHandler.post(processingTick)
         mainHandler.postDelayed(finalResultTimeout, FINAL_RESULT_TIMEOUT_MS)
     }
 
@@ -522,25 +516,24 @@ class OverlayBubbleService : Service() {
 
     private fun completeCopy(finalText: String, wasRefined: Boolean) {
         if (state != BubbleFlowState.PROCESSING) return
-        mainHandler.removeCallbacks(processingTick)
         mainHandler.removeCallbacks(finalResultTimeout)
-        val trimmed = finalText.trim()
-        if (trimmed.isEmpty()) {
-            setError("No speech recognized. Try again.")
+        val copiedText = InsertionText.normalize(finalText)
+        if (copiedText == null) {
+            setError(R.string.error_no_speech)
             return
         }
         val copied = runCatching {
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            clipboard.setPrimaryClip(ClipData.newPlainText("VoiceTyping", trimmed))
-            ClipboardStateStore.markCopied(trimmed)
+            clipboard.setPrimaryClip(ClipData.newPlainText("VoiceTyping", copiedText))
+            ClipboardStateStore.markCopied(copiedText)
         }.isSuccess
         waitingForFinal = false
         destroyRecognizer()
         state = BubbleFlowRules.processingFinished(copied)
         updateBubbleAppearance()
-        if (copied && wasRefined) showToast("Refined and copied. Paste, or hold and drag.")
-        else if (copied) showToast("Copied raw transcript. Refinement unavailable.")
-        else showToast("Copy failed. Tap the red button to try again.")
+        if (copied && wasRefined) showToast(R.string.toast_copied)
+        else if (copied) showToast(R.string.toast_copied_raw)
+        else showToast(R.string.error_copy_failed)
     }
 
     private fun destroyRecognizer() {
@@ -555,7 +548,6 @@ class OverlayBubbleService : Service() {
     }
 
     private fun resetForNextRecording() {
-        mainHandler.removeCallbacks(processingTick)
         mainHandler.removeCallbacks(finalResultTimeout)
         mainHandler.removeCallbacks(recordingTick)
         destroyRecognizer()
@@ -568,16 +560,15 @@ class OverlayBubbleService : Service() {
         updateBubbleAppearance()
         showToast(
             if (currentRecordingMode() == RecordingMode.TAP_TO_TOGGLE) {
-                "Ready. Tap to record."
+                R.string.toast_ready_tap
             } else {
-                "Ready. Hold to record."
+                R.string.toast_ready_hold
             },
         )
     }
 
-    private fun setError(message: String) {
+    private fun setError(@StringRes messageRes: Int) {
         mainHandler.removeCallbacks(recordingTick)
-        mainHandler.removeCallbacks(processingTick)
         mainHandler.removeCallbacks(finalResultTimeout)
         waitingForFinal = false
         destroyRecognizer()
@@ -585,58 +576,34 @@ class OverlayBubbleService : Service() {
         refineThread = null
         state = BubbleFlowState.ERROR
         updateBubbleAppearance()
-        showToast(message)
+        showToast(messageRes)
     }
 
-    private fun speechErrorMessage(code: Int): String {
+    @StringRes
+    private fun speechErrorMessage(code: Int): Int {
         return when (code) {
-            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Microphone permission is required"
+            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> R.string.error_mic_permission
             SpeechRecognizer.ERROR_NO_MATCH, SpeechRecognizer.ERROR_SPEECH_TIMEOUT ->
-                "No speech recognized. Try again."
+                R.string.error_no_speech
             SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT,
-            SpeechRecognizer.ERROR_SERVER, SpeechRecognizer.ERROR_SERVER_DISCONNECTED ->
-                "Speech service unavailable. Try again."
-            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Speech recognizer is busy. Try again."
+            SpeechRecognizer.ERROR_SERVER, SpeechRecognizer.ERROR_SERVER_DISCONNECTED,
             SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED, SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE ->
-                "Speech language is unavailable"
-            else -> "Speech recognition failed. Try again."
+                R.string.error_speech_unavailable
+            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> R.string.error_speech_busy
+            else -> R.string.error_speech_failed
         }
     }
 
     private fun updateBubbleAppearance() {
         val view = bubble ?: return
-        val visual = when (state) {
-            BubbleFlowState.IDLE -> when (currentRecordingMode()) {
-                RecordingMode.HOLD_TO_RECORD ->
-                    BubbleVisual("HOLD", getColor(R.color.signal_blue), 10f, "Hold to record")
-                RecordingMode.TAP_TO_TOGGLE ->
-                    BubbleVisual("TAP", getColor(R.color.signal_blue), 12f, "Tap to start recording")
-            }
-            BubbleFlowState.RECORDING -> {
-                val seconds = (SystemClock.elapsedRealtime() - recordingStartedAt).coerceAtLeast(0L) / 1000f
-                val instruction = if (recordingSessionMode == RecordingMode.TAP_TO_TOGGLE) {
-                    "Recording. Tap to finish"
-                } else {
-                    "Recording. Release to finish"
-                }
-                BubbleVisual(String.format(Locale.US, "%.1f", seconds), getColor(R.color.recording_coral), 16f, instruction)
-            }
-            BubbleFlowState.PROCESSING -> BubbleVisual(
-                ".".repeat(processingFrame + 1),
-                getColor(R.color.signal_blue),
-                18f,
-                "Processing recording",
-            )
-            BubbleFlowState.COPIED -> BubbleVisual("✓", getColor(R.color.success_mint), 25f, "Copied. Hold and drag, paste manually, or tap to clear")
-            BubbleFlowState.ERROR -> BubbleVisual("!", getColor(R.color.recording_coral), 24f, "An error occurred. Tap to reset")
-        }
-        view.text = visual.label
-        view.textSize = visual.textSize
-        view.backgroundTintList = ColorStateList.valueOf(visual.color)
-        view.contentDescription = visual.contentDescription
+        val recording = state == BubbleFlowState.RECORDING
+        val elapsed = if (recording) SystemClock.elapsedRealtime() - recordingStartedAt else 0L
+        val mode = if (recording) recordingSessionMode else currentRecordingMode()
+        view.render(state, mode, elapsed)
     }
 
-    private fun showToast(message: String) = Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    private fun showToast(@StringRes messageRes: Int) =
+        Toast.makeText(this, messageRes, Toast.LENGTH_SHORT).show()
 
     private fun currentRecordingMode(): RecordingMode = appSettingsStore.read().recordingMode
 
@@ -648,6 +615,7 @@ class OverlayBubbleService : Service() {
         bubble?.let { runCatching { windowManager.removeView(it) } }
         bubble = null
         removeCopiedDragGuide()
+        removeFirstUseHint()
         isRunning = false
         try {
             stopForeground(STOP_FOREGROUND_REMOVE)
@@ -669,9 +637,15 @@ class OverlayBubbleService : Service() {
         return Notification.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_mic)
             .setContentTitle(getString(R.string.bubble_notification_title))
-            .setContentText("Use the floating button to record and copy speech.")
+            .setContentText(getString(R.string.bubble_notification_text))
             .setOngoing(true)
-            .addAction(Notification.Action.Builder(null, "Stop bubble", stopIntent).build())
+            .addAction(
+                Notification.Action.Builder(
+                    null,
+                    getString(R.string.bubble_notification_stop),
+                    stopIntent,
+                ).build(),
+            )
             .build()
     }
 
@@ -682,13 +656,6 @@ class OverlayBubbleService : Service() {
     }
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
-
-    private data class BubbleVisual(
-        val label: String,
-        val color: Int,
-        val textSize: Float,
-        val contentDescription: String,
-    )
 
     private data class RefinementOutcome(val text: String, val refined: Boolean)
 
@@ -716,8 +683,9 @@ class OverlayBubbleService : Service() {
         private const val DIRECT_READ_TIMEOUT_MS = 20_000
         private const val DIRECT_MAX_ATTEMPTS = 4
         private val DIRECT_RETRY_DELAYS_MS = longArrayOf(400L, 1_000L, 2_000L)
-        private const val TIMER_TICK_MS = 100L
-        private const val PROCESSING_TICK_MS = 160L
-        private const val DRAG_GUIDE_ALPHA = 0.60f
+        private const val TIMER_TICK_MS = 250L
+        private const val FIRST_USE_HINT_MS = 4_500L
+        private const val UI_PREFERENCES_NAME = "voicetyping_ui"
+        private const val KEY_FIRST_USE_HINT_SHOWN = "first_use_hint_shown"
     }
 }

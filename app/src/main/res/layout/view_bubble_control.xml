@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Floating control. Size is fixed at 62dp; the window stays non-focusable. -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ImageView
+        android:id="@+id/bubble_ring"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:src="@drawable/bubble_ring"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/bubble_arc"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_gravity="center"
+        android:importantForAccessibility="no"
+        android:src="@drawable/bubble_arc"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/bubble_stack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/bubble_glyph"
+            android:layout_width="@dimen/bubble_glyph"
+            android:layout_height="@dimen/bubble_glyph"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_mic"
+            app:tint="@color/white" />
+
+        <TextView
+            android:id="@+id/bubble_timer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:importantForAccessibility="no"
+            android:textAppearance="@style/TextAppearance.VoiceTyping.Timer"
+            android:textColor="@color/white"
+            android:visibility="gone" />
+    </LinearLayout>
+</merge>
