@@ -387,7 +387,7 @@ class OverlayBubbleService : Service() {
             setError("Could not start speech recognition")
             return
         }
-        val intent = buildRecognizerIntent()
+        val intent = buildRecognizerIntent(mode)
         speechRecognizer = recognizer
         waitingForFinal = false
         finalDelivered = false
@@ -428,13 +428,27 @@ class OverlayBubbleService : Service() {
         return runCatching { SpeechRecognizer.createSpeechRecognizer(this) }.getOrNull()
     }
 
-    private fun buildRecognizerIntent(): Intent {
+    private fun buildRecognizerIntent(mode: RecordingMode): Intent {
+        val completeSilenceMs = if (mode == RecordingMode.TAP_TO_TOGGLE) {
+            TAP_COMPLETE_SILENCE_MS
+        } else {
+            HOLD_COMPLETE_SILENCE_MS
+        }
+        val possibleSilenceMs = if (mode == RecordingMode.TAP_TO_TOGGLE) {
+            TAP_POSSIBLE_SILENCE_MS
+        } else {
+            HOLD_POSSIBLE_SILENCE_MS
+        }
         return Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault().toLanguageTag())
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
             putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, packageName)
+            // These are endpointing hints. Some vendor recognition services may ignore them,
+            // but Google speech services honour them on most supported devices.
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, completeSilenceMs)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, possibleSilenceMs)
         }
     }
 
@@ -692,7 +706,11 @@ class OverlayBubbleService : Service() {
         private const val MOVE_SLOP_DP = 10
         private const val HOLD_TO_RECORD_MS = 250L
         private const val HOLD_TO_DRAG_MS = 450L
-        private const val MAX_RECORDING_MS = 10_000L
+        private const val MAX_RECORDING_MS = 120_000L
+        private const val TAP_COMPLETE_SILENCE_MS = 10_000L
+        private const val TAP_POSSIBLE_SILENCE_MS = 7_500L
+        private const val HOLD_COMPLETE_SILENCE_MS = 3_000L
+        private const val HOLD_POSSIBLE_SILENCE_MS = 1_500L
         private const val FINAL_RESULT_TIMEOUT_MS = 3_500L
         private const val DIRECT_CONNECT_TIMEOUT_MS = 7_000
         private const val DIRECT_READ_TIMEOUT_MS = 20_000
