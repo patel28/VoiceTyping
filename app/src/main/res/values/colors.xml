@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ink">#15191F</color>
+    <color name="surface">#F5F7FA</color>
+    <color name="signal_blue">#2864DC</color>
+    <color name="recording_coral">#E75555</color>
+    <color name="success_mint">#2A9D72</color>
+    <color name="white">#FFFFFF</color>
+</resources>

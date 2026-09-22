@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.VoiceTyping" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/signal_blue</item>
+        <item name="colorSecondary">@color/success_mint</item>
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">@color/signal_blue</item>
+        <item name="android:navigationBarColor">@color/surface</item>
+        <item name="android:statusBarColor">@color/surface</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>
