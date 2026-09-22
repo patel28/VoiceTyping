@@ -106,6 +106,55 @@
                 android:layout_marginTop="@dimen/space_5"
                 android:background="@color/hairline" />
 
+            <TextView
+                style="@style/Widget.VoiceTyping.SectionLabel"
+                android:layout_marginTop="@dimen/space_3"
+                android:layout_marginBottom="@dimen/space_2"
+                android:text="@string/bubble_visibility_label" />
+
+            <RadioGroup
+                android:id="@+id/bubble_visibility_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/bubble_visibility_always"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_mode_option"
+                    android:buttonTint="@color/signal_blue"
+                    android:minHeight="@dimen/touch_min"
+                    android:padding="@dimen/space_3"
+                    android:text="@string/bubble_visibility_always"
+                    android:textAppearance="@style/TextAppearance.VoiceTyping.Body" />
+
+                <RadioButton
+                    android:id="@+id/bubble_visibility_keyboard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_2"
+                    android:background="@drawable/bg_mode_option"
+                    android:buttonTint="@color/signal_blue"
+                    android:minHeight="@dimen/touch_min"
+                    android:padding="@dimen/space_3"
+                    android:text="@string/bubble_visibility_keyboard"
+                    android:textAppearance="@style/TextAppearance.VoiceTyping.Body" />
+            </RadioGroup>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_2"
+                android:text="@string/bubble_visibility_note"
+                android:textAppearance="@style/TextAppearance.VoiceTyping.Caption" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/hairline"
+                android:layout_marginTop="@dimen/space_5"
+                android:background="@color/hairline" />
+
             <!-- Advanced: AI refinement. Collapsed by default; refinement is optional. -->
             <LinearLayout
                 android:id="@+id/advanced_row"

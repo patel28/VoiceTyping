@@ -6,6 +6,7 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.isChecked
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withSubstring
 import androidx.test.espresso.matcher.ViewMatchers.withText
@@ -58,6 +59,21 @@ class SettingsActivityUiTest {
                 .check(matches(withText(R.string.action_show)))
             scenario.onActivity { it.findViewById<View>(R.id.api_key_visibility).performClick() }
             onView(withId(R.id.api_key_visibility)).check(matches(withText(R.string.action_hide)))
+        }
+    }
+
+    @Test fun bubbleVisibilityOffersSafeDefaultAndExperimentalOption() {
+        ActivityScenario.launch(SettingsActivity::class.java).use {
+            onView(withId(R.id.bubble_visibility_always))
+                .perform(scrollTo())
+                .check(matches(isDisplayed()))
+                .check(matches(isChecked()))
+            onView(withId(R.id.bubble_visibility_keyboard))
+                .perform(scrollTo())
+                .check(matches(withText(R.string.bubble_visibility_keyboard)))
+            onView(withText(R.string.bubble_visibility_note))
+                .perform(scrollTo())
+                .check(matches(isDisplayed()))
         }
     }
 

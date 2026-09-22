@@ -1,5 +1,6 @@
 package com.voicetyping.directtest
 
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.os.Bundle
@@ -34,6 +35,8 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var modeGroup: RadioGroup
     private lateinit var holdOption: RadioButton
     private lateinit var tapOption: RadioButton
+    private lateinit var bubbleVisibilityGroup: RadioGroup
+    private lateinit var keyboardVisibleOption: RadioButton
     private lateinit var apiKeyField: EditText
     private lateinit var modelField: EditText
     private lateinit var visibilityButton: Button
@@ -53,6 +56,8 @@ class SettingsActivity : AppCompatActivity() {
         modeGroup = findViewById(R.id.mode_group)
         holdOption = findViewById(R.id.mode_hold)
         tapOption = findViewById(R.id.mode_tap)
+        bubbleVisibilityGroup = findViewById(R.id.bubble_visibility_group)
+        keyboardVisibleOption = findViewById(R.id.bubble_visibility_keyboard)
         apiKeyField = findViewById(R.id.api_key_field)
         modelField = findViewById(R.id.model_field)
         visibilityButton = findViewById(R.id.api_key_visibility)
@@ -84,6 +89,14 @@ class SettingsActivity : AppCompatActivity() {
             if (settings.recordingMode == RecordingMode.TAP_TO_TOGGLE) tapOption.id else holdOption.id,
         )
         modeGroup.setOnCheckedChangeListener { _, _ -> hideSaveStatus() }
+        bubbleVisibilityGroup.check(
+            if (settings.bubbleVisibilityMode == BubbleVisibilityMode.WHEN_KEYBOARD_VISIBLE_EXPERIMENTAL) {
+                keyboardVisibleOption.id
+            } else {
+                R.id.bubble_visibility_always
+            },
+        )
+        bubbleVisibilityGroup.setOnCheckedChangeListener { _, _ -> hideSaveStatus() }
 
         apiKeyField.setText(settings.apiKey)
         apiKeyField.transformationMethod = PasswordTransformationMethod.getInstance()
@@ -185,10 +198,23 @@ class SettingsActivity : AppCompatActivity() {
         val saved = store.save(
             AppSettings(
                 recordingMode = mode,
+                bubbleVisibilityMode = if (
+                    bubbleVisibilityGroup.checkedRadioButtonId == keyboardVisibleOption.id
+                ) {
+                    BubbleVisibilityMode.WHEN_KEYBOARD_VISIBLE_EXPERIMENTAL
+                } else {
+                    BubbleVisibilityMode.ALWAYS_SHOW
+                },
                 apiKey = apiKeyField.text.toString(),
                 refinementModel = modelField.text.toString(),
             ),
         )
+        if (saved && OverlayBubbleService.isRunning) {
+            startService(
+                Intent(this, OverlayBubbleService::class.java)
+                    .setAction(OverlayBubbleService.ACTION_REFRESH_VISIBILITY),
+            )
+        }
         showSaveStatus(saved)
     }
 

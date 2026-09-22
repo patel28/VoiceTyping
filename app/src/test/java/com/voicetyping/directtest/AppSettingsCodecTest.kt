@@ -9,8 +9,15 @@ class AppSettingsCodecTest {
     }
 
     @Test fun encodesStableRecordingModeValues() {
-        val encoded = AppSettingsCodec.encode(AppSettings(RecordingMode.TAP_TO_TOGGLE, " key ", " model "))
+        val encoded = AppSettingsCodec.encode(
+            AppSettings(
+                recordingMode = RecordingMode.TAP_TO_TOGGLE,
+                apiKey = " key ",
+                refinementModel = " model ",
+            ),
+        )
         assertEquals("TAP_TO_TOGGLE", encoded[AppSettingsCodec.KEY_RECORDING_MODE])
+        assertEquals("ALWAYS_SHOW", encoded[AppSettingsCodec.KEY_BUBBLE_VISIBILITY_MODE])
         assertEquals("key", encoded[AppSettingsCodec.KEY_API_KEY])
         assertEquals("model", encoded[AppSettingsCodec.KEY_REFINEMENT_MODEL])
     }
@@ -18,11 +25,29 @@ class AppSettingsCodecTest {
     @Test fun decodesUnknownOrBlankValuesSafely() {
         val settings = AppSettingsCodec.decode(mapOf(
             AppSettingsCodec.KEY_RECORDING_MODE to "something_new",
+            AppSettingsCodec.KEY_BUBBLE_VISIBILITY_MODE to "something_new",
             AppSettingsCodec.KEY_API_KEY to "  secret  ",
             AppSettingsCodec.KEY_REFINEMENT_MODEL to " ",
         ))
         assertEquals(RecordingMode.HOLD_TO_RECORD, settings.recordingMode)
+        assertEquals(BubbleVisibilityMode.ALWAYS_SHOW, settings.bubbleVisibilityMode)
         assertEquals("secret", settings.apiKey)
         assertEquals(AppSettings.DEFAULT_REFINEMENT_MODEL, settings.refinementModel)
+    }
+
+    @Test fun decodesExperimentalVisibilityAndDefaultsWhenMissing() {
+        assertEquals(
+            BubbleVisibilityMode.ALWAYS_SHOW,
+            AppSettingsCodec.decode(emptyMap()).bubbleVisibilityMode,
+        )
+        assertEquals(
+            BubbleVisibilityMode.WHEN_KEYBOARD_VISIBLE_EXPERIMENTAL,
+            AppSettingsCodec.decode(
+                mapOf(
+                    AppSettingsCodec.KEY_BUBBLE_VISIBILITY_MODE to
+                        "WHEN_KEYBOARD_VISIBLE_EXPERIMENTAL",
+                ),
+            ).bubbleVisibilityMode,
+        )
     }
 }

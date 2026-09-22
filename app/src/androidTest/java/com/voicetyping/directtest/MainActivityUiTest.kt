@@ -3,7 +3,6 @@ package com.voicetyping.directtest
 import android.view.View
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -58,10 +57,14 @@ class MainActivityUiTest {
 
     @Test
     fun blankApiKeyShowsRefinementWarningAndOpensSettings() = withApiKey("") {
-        ActivityScenario.launch(MainActivity::class.java).use {
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             onView(withId(R.id.api_key_missing_warning)).check(matches(isDisplayed()))
             onView(withText(R.string.api_key_missing_warning_body)).check(matches(isDisplayed()))
-            onView(withId(R.id.api_key_missing_warning)).perform(click())
+            // Direct click keeps this assertion reliable on OEM phones that do not allow adb
+            // to disable system animations (Espresso rejects animated coordinate clicks).
+            scenario.onActivity {
+                it.findViewById<View>(R.id.api_key_missing_warning).performClick()
+            }
             onView(withText(R.string.settings_title)).check(matches(isDisplayed()))
         }
     }

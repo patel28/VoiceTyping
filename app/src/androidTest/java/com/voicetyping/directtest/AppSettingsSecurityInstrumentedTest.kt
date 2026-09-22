@@ -17,7 +17,15 @@ class AppSettingsSecurityInstrumentedTest {
         val original = store.read()
 
         try {
-            assertTrue(store.save(AppSettings(RecordingMode.TAP_TO_TOGGLE, rawKey, "gpt-5.4")))
+            assertTrue(
+                store.save(
+                    AppSettings(
+                        recordingMode = RecordingMode.TAP_TO_TOGGLE,
+                        apiKey = rawKey,
+                        refinementModel = "gpt-5.4",
+                    ),
+                ),
+            )
             assertEquals(rawKey, store.read().apiKey)
             assertEquals(RecordingMode.TAP_TO_TOGGLE, store.read().recordingMode)
 

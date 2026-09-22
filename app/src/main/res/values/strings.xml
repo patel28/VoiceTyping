@@ -64,6 +64,10 @@
     <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_recording_label">Recording control</string>
+    <string name="bubble_visibility_label">Floating mic visibility</string>
+    <string name="bubble_visibility_always">Always show</string>
+    <string name="bubble_visibility_keyboard">Show with keyboard — Experimental</string>
+    <string name="bubble_visibility_note">Best effort: keyboard detection varies by keyboard and device. Floating or hardware keyboards may not be detected.</string>
     <string name="mode_hold_detail">Hold the floating mic, speak, release to finish.</string>
     <string name="mode_tap_detail">Tap once to start, tap again to finish.</string>
     <string name="recording_limit_note">A recording can run for up to 2 minutes. Some Android speech services stop after a long silence.</string>

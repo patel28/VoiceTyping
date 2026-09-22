@@ -13,6 +13,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
+import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Bundle
@@ -35,6 +36,8 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.content.edit
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import java.util.Locale
 
 /** Visible recording shortcut. Transcribes with SpeechRecognizer, refines, then copies. */
@@ -44,6 +47,9 @@ class OverlayBubbleService : Service() {
     private lateinit var windowManager: WindowManager
     private lateinit var appSettingsStore: AppSettingsStore
     private var bubble: BubbleControlView? = null
+    private var bubbleLayoutParams: WindowManager.LayoutParams? = null
+    private var imeObserver: View? = null
+    private var imeVisible = false
     private var dragGuide: View? = null
     private var firstUseHint: View? = null
     private var copiedDragInProgress = false
@@ -55,6 +61,11 @@ class OverlayBubbleService : Service() {
     private var recordingStartedAt = 0L
     private var recordingSessionMode = RecordingMode.HOLD_TO_RECORD
     private var refineThread: Thread? = null
+
+    private val hideBubbleAfterIme = Runnable {
+        imeVisible = false
+        applyBubbleVisibility()
+    }
 
     private val recordingTick = object : Runnable {
         override fun run() {
@@ -138,6 +149,10 @@ class OverlayBubbleService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_STOP -> stopSelf()
+            ACTION_REFRESH_VISIBILITY -> {
+                imeObserver?.let(ViewCompat::requestApplyInsets)
+                applyBubbleVisibility()
+            }
             ACTION_START, null -> if (bubble == null && Settings.canDrawOverlays(this)) attachBubble()
         }
         return START_NOT_STICKY
@@ -159,7 +174,10 @@ class OverlayBubbleService : Service() {
 
     private fun attachBubble() {
         if (bubble != null) return
+        attachImeObserver()
+        state = if (ClipboardStateStore.read() != null) BubbleFlowState.COPIED else BubbleFlowState.IDLE
         val view = BubbleControlView(this)
+        view.visibility = if (shouldShowBubble()) View.VISIBLE else View.GONE
         val params = WindowManager.LayoutParams(
             dp(BUBBLE_SIZE_DP),
             dp(BUBBLE_SIZE_DP),
@@ -175,13 +193,71 @@ class OverlayBubbleService : Service() {
         try {
             windowManager.addView(view, params)
             bubble = view
-            state = if (ClipboardStateStore.read() != null) BubbleFlowState.COPIED else BubbleFlowState.IDLE
+            bubbleLayoutParams = params
             updateBubbleAppearance()
-            if (state == BubbleFlowState.IDLE) showFirstUseHintIfNeeded(params)
         } catch (_: SecurityException) {
             stopSelf()
         } catch (_: WindowManager.BadTokenException) {
             stopSelf()
+        }
+    }
+
+    /**
+     * A fully transparent, non-touchable overlay sits behind the IME and receives its insets.
+     * This is best-effort: floating and some OEM keyboards report no IME inset.
+     */
+    private fun attachImeObserver() {
+        if (imeObserver != null) return
+        val observer = View(this).apply { setBackgroundColor(Color.TRANSPARENT) }
+        ViewCompat.setOnApplyWindowInsetsListener(observer) { _, insets ->
+            onImeVisibilityChanged(insets.isVisible(WindowInsetsCompat.Type.ime()))
+            insets
+        }
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+                WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM or
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+            PixelFormat.TRANSLUCENT,
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            alpha = 0f
+        }
+        runCatching {
+            windowManager.addView(observer, params)
+            imeObserver = observer
+            ViewCompat.requestApplyInsets(observer)
+        }
+    }
+
+    private fun onImeVisibilityChanged(visible: Boolean) {
+        mainHandler.removeCallbacks(hideBubbleAfterIme)
+        if (visible) {
+            imeVisible = true
+            applyBubbleVisibility()
+        } else {
+            mainHandler.postDelayed(hideBubbleAfterIme, IME_HIDE_DEBOUNCE_MS)
+        }
+    }
+
+    private fun shouldShowBubble(): Boolean {
+        val mode = appSettingsStore.read().bubbleVisibilityMode
+        if (mode == BubbleVisibilityMode.WHEN_KEYBOARD_VISIBLE_EXPERIMENTAL && imeObserver == null) {
+            return true
+        }
+        return BubbleVisibilityRules.shouldShow(mode, imeVisible, state)
+    }
+
+    private fun applyBubbleVisibility() {
+        val view = bubble ?: return
+        view.visibility = if (shouldShowBubble()) View.VISIBLE else View.GONE
+        if (view.visibility == View.VISIBLE && state == BubbleFlowState.IDLE) {
+            bubbleLayoutParams?.let(::showFirstUseHintIfNeeded)
+        } else if (view.visibility != View.VISIBLE) {
+            removeFirstUseHint()
         }
     }
 
@@ -600,6 +676,7 @@ class OverlayBubbleService : Service() {
         val elapsed = if (recording) SystemClock.elapsedRealtime() - recordingStartedAt else 0L
         val mode = if (recording) recordingSessionMode else currentRecordingMode()
         view.render(state, mode, elapsed)
+        applyBubbleVisibility()
     }
 
     private fun showToast(@StringRes messageRes: Int) =
@@ -614,6 +691,9 @@ class OverlayBubbleService : Service() {
         refineThread = null
         bubble?.let { runCatching { windowManager.removeView(it) } }
         bubble = null
+        bubbleLayoutParams = null
+        imeObserver?.let { runCatching { windowManager.removeView(it) } }
+        imeObserver = null
         removeCopiedDragGuide()
         removeFirstUseHint()
         isRunning = false
@@ -666,6 +746,8 @@ class OverlayBubbleService : Service() {
 
         const val ACTION_START = "com.voicetyping.directtest.action.START_BUBBLE"
         const val ACTION_STOP = "com.voicetyping.directtest.action.STOP_BUBBLE"
+        const val ACTION_REFRESH_VISIBILITY =
+            "com.voicetyping.directtest.action.REFRESH_BUBBLE_VISIBILITY"
         private const val TAG = "OverlayBubble"
         private const val CHANNEL_ID = "voice_bubble"
         private const val NOTIFICATION_ID = 7421
@@ -685,6 +767,7 @@ class OverlayBubbleService : Service() {
         private val DIRECT_RETRY_DELAYS_MS = longArrayOf(400L, 1_000L, 2_000L)
         private const val TIMER_TICK_MS = 250L
         private const val FIRST_USE_HINT_MS = 4_500L
+        private const val IME_HIDE_DEBOUNCE_MS = 200L
         private const val UI_PREFERENCES_NAME = "voicetyping_ui"
         private const val KEY_FIRST_USE_HINT_SHOWN = "first_use_hint_shown"
     }
