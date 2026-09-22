@@ -1,34 +1,42 @@
-# VoiceTyping Clipboard Prototype
+# VoiceTyping
 
-Android 13+ compatibility APK for one focused question: can a floating voice shortcut transcribe speech, refine it, and copy the result that the user pastes manually, without IME, Accessibility, clipboard auto-read, or replacing the user's keyboard?
+Android 13+ voice typing companion for professionals:
 
-## Test flow
+`floating control → native speech recognition → optional GPT-5.4 cleanup → clipboard → Paste`
 
-1. Install the debug APK and open **VoiceTyping Direct Test**.
-2. Allow microphone access and overlay display.
-3. Start the local refinement server: `node server/server.mjs` (reads `server/.env.local`), then `adb reverse tcp:8787 tcp:8787`.
-4. Tap **Start floating mic**.
-5. Hold the blue **HOLD** bubble and speak for up to 10 seconds. The bubble turns coral and shows elapsed time. Speech uses `SpeechRecognizer`, preferring the on-device recognizer with system fallback.
-6. Release the bubble. `stopListening()` releases the mic; a bounded final-result timeout waits for transcription. Animated dots indicate processing; a mint check means the refined text (or raw transcript on server failure) was copied.
-7. In the focused field, long-press and tap **Paste**.
-8. Quick-tap the mint check to reset for another recording.
-9. Experimental drag: hold the mint check, then drag it onto a field that accepts Android text drops. Drag does not work in every app; clipboard Paste remains the fallback.
+It does not replace the keyboard and does not use Accessibility. Android `SpeechRecognizer` handles transcription, preferring on-device recognition when available, so transcription itself has no OpenAI cost.
 
-Transcripts are sent as `{text, locale}` to `POST /v1/refine` (base URL from `app/src/main/assets/app-settings.properties`, default `http://127.0.0.1:8787`). The app never logs transcript text or secrets. Debug builds allow localhost cleartext only; release keeps cleartext disabled.
+## Use
+
+1. Open **VoiceTyping**, allow microphone and display-over-other-apps access, then start the floating mic.
+2. In **Settings**, choose **Hold to record** or **Tap to toggle**.
+3. Speak, wait for the mint check, then use normal Paste. Hold the mint check to try global drag/drop; the dim chat cue is visual only and cannot force apps that reject text drops.
+
+The overlay and drag guide are non-focusable; VoiceTyping never opens a keyboard picker or activity while recording. This preserves the external app's editor focus as far as Android permits. Without IME or Accessibility, an app cannot forcibly refocus or paste into another app, so normal Paste remains the reliable fallback.
+
+## Refinement modes
+
+- **Personal key:** Enter an optional OpenAI API key in Settings. It is empty by default, encrypted at rest using Android Keystore, never logged, and sent only to the OpenAI Responses API. The model setting defaults to `gpt-5.4` with reasoning effort `none`.
+- **Local development server:** With no personal key, the app tries `http://127.0.0.1:8787/v1/refine`. Run `node server/server.mjs` and `adb reverse tcp:8787 tcp:8787`. The server reads ignored `server/.env.local` and keeps the provider key off the APK.
+- **Offline-safe fallback:** If refinement is unavailable, the raw Android transcript is still copied.
+
+Direct mobile API keys can be extracted from a compromised device. Personal-key mode is for owner-operated testing; a production multi-user release should use an authenticated HTTPS backend.
 
 ## Permissions
 
-The manifest declares Internet, microphone, overlay, base foreground-service, microphone foreground-service, and foreground-service special-use permissions. `FOREGROUND_SERVICE_MICROPHONE` is a normal manifest permission required by Android 14+; the only microphone runtime prompt remains `RECORD_AUDIO`. `INTERNET` is a normal permission for the local refinement call. The app has no Accessibility, storage, contacts, location, broad package enumeration, clipboard-specific, analytics, login, or notification permission. Android's one narrowly scoped `android.speech.RecognitionService` visibility declaration is included because Android 11+ requires it for `SpeechRecognizer`.
+The manifest declares Internet, microphone, overlay, base foreground-service, microphone foreground-service, and foreground-service special-use permissions. Only `RECORD_AUDIO` prompts at runtime. There is no Accessibility, storage, contacts, location, broad package enumeration, clipboard-specific, analytics, login, or notification permission. The narrow `android.speech.RecognitionService` visibility declaration is required by Android 11+ for native recognition.
 
-Some banking apps use Android's secure overlay-hiding behavior, so the bubble may disappear while those apps are foregrounded. Use [BANKING_TEST_CHECKLIST.md](BANKING_TEST_CHECKLIST.md) to distinguish overlay, sideloading, and installed-app effects. Never use real PINs, OTPs, credentials, or payments during this test.
+Some banking apps intentionally hide overlays; the bubble disappearing there is expected. See [BANKING_TEST_CHECKLIST.md](BANKING_TEST_CHECKLIST.md). Never test with real PINs, OTPs or payments.
 
-Prototype 1's IME direct-insert implementation is preserved outside the active source sets under [archive/prototype1-ime](archive/prototype1-ime/README.md).
-The previous modal clipboard recorder is preserved under [archive/prototype2-tap-recorder](archive/prototype2-tap-recorder/README.md).
+## Build and verification
 
-## Refinement server
+Use JDK 17 and Android SDK 35:
 
-Dependency-free `server/server.mjs` (Node built-ins only). Put the key in `server/.env.local` as `OPENAI_API_KEY="sk-..."`; quoted or unquoted values both work. The configurable defaults are `OPENAI_REFINEMENT_MODEL=gpt-5.4`, reasoning `none`, and port `8787`. Endpoints: `GET /health`, `POST /v1/refine`. The server calls OpenAI `POST https://api.openai.com/v1/responses` with `store: false` and short output, retrying 429/5xx/network up to three times after the initial request with increasing non-blocking delay. Request-size limits apply; secrets and transcript text are never logged.
+```bash
+./gradlew testDebugUnitTest lintDebug assembleDebug
+./gradlew connectedDebugAndroidTest
+```
 
-## Build
+APK: `app/build/outputs/apk/debug/app-debug.apk`
 
-Use JDK 17, Android SDK 35, and `./gradlew testDebugUnitTest lintDebug assembleDebug`. Device-only instrumentation requires a connected Android 13+ device or emulator.
+Earlier IME and modal-recorder prototypes remain under `archive/` and are outside active source sets.

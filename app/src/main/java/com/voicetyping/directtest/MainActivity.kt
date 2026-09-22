@@ -14,7 +14,7 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 
-/** Setup screen: mic, overlay, bubble, and local refinement server status. */
+/** Production-oriented setup screen for the microphone and visible floating shortcut. */
 @SuppressLint("SetTextI18n") // This compatibility instrument intentionally ships in English only.
 class MainActivity : Activity() {
     private lateinit var statusText: TextView
@@ -60,13 +60,13 @@ class MainActivity : Activity() {
             setBackgroundColor(getColor(R.color.surface))
         }
         page.addView(TextView(this).apply {
-            text = "VoiceTyping / Clipboard mode"
+            text = "VoiceTyping"
             setTextColor(getColor(R.color.ink))
             textSize = 25f
             setTypeface(typeface, android.graphics.Typeface.BOLD)
         })
         page.addView(TextView(this).apply {
-            text = "Quick test · Android 13+"
+            text = "Private voice capture · Android 13+"
             setTextColor(getColor(R.color.ink))
             alpha = .65f
             textSize = 14f
@@ -83,6 +83,8 @@ class MainActivity : Activity() {
         }
         page.addView(statusText, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(12) })
 
+        page.addView(button("Settings", ::openSettings), spaced(dp(12)))
+
         page.addView(button("Allow microphone", ::requestMicrophone), spaced(dp(8)))
         page.addView(button("Open overlay permission", ::openOverlaySettings), spaced(dp(8)))
         bubbleButton = button("Start floating mic", ::toggleBubble)
@@ -91,20 +93,19 @@ class MainActivity : Activity() {
         page.addView(
             section(
                 "HOW IT WORKS",
-                "1. Hold the blue button and speak (on-device speech when available).\n" +
-                    "2. Release it — transcription is refined, then the green check means copied.\n" +
-                    "3. If refinement fails, the raw transcript is copied instead.\n" +
-                    "4. Paste normally, or hold and drag the green check where supported.\n\n" +
-                    "Quick-tap the green check to record again.",
+                "1. Grant microphone and display-over-other-apps access.\n" +
+                    "2. Start the floating mic, then record using your selected mode.\n" +
+                    "3. Speech is copied when processing is complete; paste normally.\n\n" +
+                    "Manage recording behavior and optional refinement in Settings.",
             ),
             spaced(dp(10)),
         )
 
         page.addView(
             section(
-                "REFINEMENT SERVER",
-                "Debug builds refine via http://127.0.0.1:8787.\n" +
-                    "Run: node server/server.mjs, then adb reverse tcp:8787 tcp:8787.",
+                "PRIVACY & REFINEMENT",
+                "VoiceTyping only asks for microphone and overlay access.\n" +
+                    "Bring-your-own-key controls are for development and testing; production refinement should use your server.",
             ),
             spaced(dp(10)),
         )
@@ -182,12 +183,22 @@ class MainActivity : Activity() {
         refreshStatus()
     }
 
+    private fun openSettings() {
+        startActivity(Intent(this, SettingsActivity::class.java))
+    }
+
     private fun refreshStatus() {
         val mic = checkSelfPermission(Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED
         val overlay = Settings.canDrawOverlays(this)
-        statusText.text = "MICROPHONE    ${if (mic) "Ready" else "Permission needed"}\n" +
-            "OVERLAY             ${if (overlay) "Allowed" else "Permission needed"}\n" +
-            "BUBBLE               ${if (OverlayBubbleService.isRunning) "Running" else "Stopped"}"
+        val mode = AppSettingsStore(this).read().recordingMode
+        val hasPersonalKey = AppSettingsStore(this).read().apiKey.isNotBlank()
+        val ready = mic && overlay
+        statusText.text = "${if (ready) "READY TO RECORD" else "SETUP REQUIRED"}\n\n" +
+            "Microphone  ${if (mic) "Ready" else "Permission needed"}\n" +
+            "Overlay  ${if (overlay) "Allowed" else "Permission needed"}\n" +
+            "Floating mic  ${if (OverlayBubbleService.isRunning) "Running" else "Stopped"}\n" +
+            "Recording mode  ${if (mode == RecordingMode.HOLD_TO_RECORD) "Hold to record" else "Tap to toggle"}\n" +
+            "AI refinement  ${if (hasPersonalKey) "Personal key" else "Local service or raw text"}"
         if (::bubbleButton.isInitialized) bubbleButton.text = if (OverlayBubbleService.isRunning) "Stop floating mic" else "Start floating mic"
     }
 

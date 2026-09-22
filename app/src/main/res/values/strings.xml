@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">VoiceTyping Direct Test</string>
+    <string name="app_name">VoiceTyping</string>
     <string name="bubble_channel_name">VoiceTyping bubble</string>
     <string name="bubble_notification_title">VoiceTyping bubble is active</string>
 </resources>

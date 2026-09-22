@@ -14,17 +14,17 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class MainActivityUiTest {
     @Test
-    fun setupScreenShowsClipboardPathAndExpectedOutput() {
+    fun setupScreenShowsReadinessAndSettingsEntryPoint() {
         ActivityScenario.launch(MainActivity::class.java).use {
-            onView(withText("VoiceTyping / Clipboard mode")).check(matches(isDisplayed()))
+            onView(withText("VoiceTyping")).check(matches(isDisplayed()))
+            onView(withText("Settings")).check(matches(isDisplayed()))
             onView(withText("Allow microphone")).check(matches(isDisplayed()))
             onView(withText("Open overlay permission")).check(matches(isDisplayed()))
             onView(withText("Start floating mic")).check(matches(isDisplayed()))
             onView(withText("HOW IT WORKS")).check(matches(isDisplayed()))
-            onView(withSubstring("Hold the blue button and speak")).check(matches(isDisplayed()))
-            onView(withSubstring("green check means copied")).check(matches(isDisplayed()))
-            onView(withText("REFINEMENT SERVER")).check(matches(isDisplayed()))
-            onView(withSubstring("your speech, refined when the local server is reachable")).check(matches(isDisplayed()))
+            onView(withSubstring("Grant microphone and display-over-other-apps access")).check(matches(isDisplayed()))
+            onView(withText("PRIVACY & REFINEMENT")).check(matches(isDisplayed()))
+            onView(withSubstring("production refinement should use your server")).check(matches(isDisplayed()))
             onView(withText("Enable / choose VoiceTyping Insert")).check(doesNotExist())
         }
     }
