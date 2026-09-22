@@ -45,7 +45,11 @@ object DirectOpenAiRefiner {
             "Fix grammar, casing, punctuation, and obvious speech-recognition errors. You may " +
             "complete a trailing unfinished sentence only when its intended completion is " +
             "unambiguous from the words already spoken; otherwise leave it incomplete. Never " +
-            "invent facts, names, numbers, commitments, or ideas. Do not answer, explain, " +
+            "invent facts, names, numbers, commitments, or ideas. Use the surrounding sentence " +
+            "and domain context to correct likely homophones or misrecognized words—for example, " +
+            "in Git or software context prefer 'commit' over 'comment' when context supports it. " +
+            "Make a word substitution only when context strongly supports the correction; preserve " +
+            "clear words and leave genuinely ambiguous words unchanged. Do not answer, explain, " +
             "translate, or summarize. Return only the refined text."
 
     /** Perform one request. Network work runs synchronously on the caller's thread. */
