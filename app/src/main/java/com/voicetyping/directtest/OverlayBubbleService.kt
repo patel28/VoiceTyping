@@ -49,6 +49,8 @@ class OverlayBubbleService : Service() {
     private var bubble: BubbleControlView? = null
     private var bubbleLayoutParams: WindowManager.LayoutParams? = null
     private var imeObserver: View? = null
+    /** Raw observer value, kept separately from the 200 ms debounced UI visibility value. */
+    private var observedImeVisible = false
     private var imeVisible = false
     private var dragGuide: View? = null
     private var firstUseHint: View? = null
@@ -65,6 +67,11 @@ class OverlayBubbleService : Service() {
     private val hideBubbleAfterIme = Runnable {
         imeVisible = false
         applyBubbleVisibility()
+    }
+
+    /** The check is feedback, not a second interaction state that blocks the next recording. */
+    private val clearCopiedFeedback = Runnable {
+        resetTerminalFeedbackForNextInput()
     }
 
     private val recordingTick = object : Runnable {
@@ -174,8 +181,8 @@ class OverlayBubbleService : Service() {
 
     private fun attachBubble() {
         if (bubble != null) return
-        attachImeObserver()
         state = if (ClipboardStateStore.read() != null) BubbleFlowState.COPIED else BubbleFlowState.IDLE
+        attachImeObserver()
         val view = BubbleControlView(this)
         view.visibility = if (shouldShowBubble()) View.VISIBLE else View.GONE
         val params = WindowManager.LayoutParams(
@@ -234,9 +241,17 @@ class OverlayBubbleService : Service() {
     }
 
     private fun onImeVisibilityChanged(visible: Boolean) {
+        val resetForNewKeyboardSession = BubbleVisibilityRules.shouldResetForNewKeyboardSession(
+            mode = appSettingsStore.read().bubbleVisibilityMode,
+            wasImeVisible = observedImeVisible,
+            isImeVisible = visible,
+            state = state,
+        )
+        observedImeVisible = visible
         mainHandler.removeCallbacks(hideBubbleAfterIme)
         if (visible) {
             imeVisible = true
+            if (resetForNewKeyboardSession) resetTerminalFeedbackForNextInput()
             applyBubbleVisibility()
         } else {
             mainHandler.postDelayed(hideBubbleAfterIme, IME_HIDE_DEBOUNCE_MS)
@@ -607,6 +622,7 @@ class OverlayBubbleService : Service() {
         destroyRecognizer()
         state = BubbleFlowRules.processingFinished(copied)
         updateBubbleAppearance()
+        if (copied) mainHandler.postDelayed(clearCopiedFeedback, COPIED_FEEDBACK_MS)
         if (copied && wasRefined) showToast(R.string.toast_copied)
         else if (copied) showToast(R.string.toast_copied_raw)
         else showToast(R.string.error_copy_failed)
@@ -631,6 +647,7 @@ class OverlayBubbleService : Service() {
         refineThread = null
         finalDelivered = false
         lastPartial = null
+        mainHandler.removeCallbacks(clearCopiedFeedback)
         state = BubbleFlowRules.reset(state)
         ClipboardStateStore.clear()
         updateBubbleAppearance()
@@ -643,6 +660,18 @@ class OverlayBubbleService : Service() {
         )
     }
 
+    /**
+     * Return the control to its mic state without touching Android's primary clipboard. The
+     * system Paste action remains available after this visual feedback has disappeared.
+     */
+    private fun resetTerminalFeedbackForNextInput() {
+        if (state != BubbleFlowState.COPIED && state != BubbleFlowState.ERROR) return
+        mainHandler.removeCallbacks(clearCopiedFeedback)
+        state = BubbleFlowRules.reset(state)
+        ClipboardStateStore.clear()
+        updateBubbleAppearance()
+    }
+
     private fun setError(@StringRes messageRes: Int) {
         mainHandler.removeCallbacks(recordingTick)
         mainHandler.removeCallbacks(finalResultTimeout)
@@ -650,6 +679,7 @@ class OverlayBubbleService : Service() {
         destroyRecognizer()
         refineThread?.let { runCatching { it.interrupt() } }
         refineThread = null
+        mainHandler.removeCallbacks(clearCopiedFeedback)
         state = BubbleFlowState.ERROR
         updateBubbleAppearance()
         showToast(messageRes)
@@ -767,6 +797,7 @@ class OverlayBubbleService : Service() {
         private val DIRECT_RETRY_DELAYS_MS = longArrayOf(400L, 1_000L, 2_000L)
         private const val TIMER_TICK_MS = 250L
         private const val FIRST_USE_HINT_MS = 4_500L
+        private const val COPIED_FEEDBACK_MS = 1_250L
         private const val IME_HIDE_DEBOUNCE_MS = 200L
         private const val UI_PREFERENCES_NAME = "voicetyping_ui"
         private const val KEY_FIRST_USE_HINT_SHOWN = "first_use_hint_shown"

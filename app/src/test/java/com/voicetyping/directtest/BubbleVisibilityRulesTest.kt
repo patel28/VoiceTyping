@@ -30,4 +30,55 @@ class BubbleVisibilityRulesTest {
             )
         }
     }
+
+    @Test fun experimentalResetsOnlyTerminalFeedbackWhenANewKeyboardSessionStarts() {
+        assertTrue(
+            BubbleVisibilityRules.shouldResetForNewKeyboardSession(
+                BubbleVisibilityMode.WHEN_KEYBOARD_VISIBLE_EXPERIMENTAL,
+                wasImeVisible = false,
+                isImeVisible = true,
+                state = BubbleFlowState.COPIED,
+            ),
+        )
+        assertTrue(
+            BubbleVisibilityRules.shouldResetForNewKeyboardSession(
+                BubbleVisibilityMode.WHEN_KEYBOARD_VISIBLE_EXPERIMENTAL,
+                wasImeVisible = false,
+                isImeVisible = true,
+                state = BubbleFlowState.ERROR,
+            ),
+        )
+
+        BubbleFlowState.values()
+            .filterNot { it == BubbleFlowState.COPIED || it == BubbleFlowState.ERROR }
+            .forEach { state ->
+                assertEquals(
+                    false,
+                    BubbleVisibilityRules.shouldResetForNewKeyboardSession(
+                        BubbleVisibilityMode.WHEN_KEYBOARD_VISIBLE_EXPERIMENTAL,
+                        wasImeVisible = false,
+                        isImeVisible = true,
+                        state = state,
+                    ),
+                )
+            }
+        assertEquals(
+            false,
+            BubbleVisibilityRules.shouldResetForNewKeyboardSession(
+                BubbleVisibilityMode.ALWAYS_SHOW,
+                wasImeVisible = false,
+                isImeVisible = true,
+                state = BubbleFlowState.COPIED,
+            ),
+        )
+        assertEquals(
+            false,
+            BubbleVisibilityRules.shouldResetForNewKeyboardSession(
+                BubbleVisibilityMode.WHEN_KEYBOARD_VISIBLE_EXPERIMENTAL,
+                wasImeVisible = true,
+                isImeVisible = true,
+                state = BubbleFlowState.COPIED,
+            ),
+        )
+    }
 }
