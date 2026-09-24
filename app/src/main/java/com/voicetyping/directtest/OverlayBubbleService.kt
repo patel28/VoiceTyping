@@ -15,6 +15,7 @@ import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.graphics.Color
 import android.graphics.PixelFormat
+import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -86,6 +87,10 @@ class OverlayBubbleService : Service() {
 
     private val finalResultTimeout = Runnable {
         if (state != BubbleFlowState.PROCESSING || finalDelivered) return@Runnable
+        if (isCallAudioActive()) {
+            setError(R.string.error_mic_in_call)
+            return@Runnable
+        }
         val fallback = lastPartial?.trim()?.takeIf { it.isNotEmpty() }
         if (fallback != null) {
             finalDelivered = true
@@ -116,7 +121,7 @@ class OverlayBubbleService : Service() {
             val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
             val transcript = SpeechTranscripts.pickBest(matches) ?: lastPartial?.trim()?.takeIf { it.isNotEmpty() }
             if (transcript.isNullOrEmpty()) {
-                setError(R.string.error_no_speech)
+                setError(if (isCallAudioActive()) R.string.error_mic_in_call else R.string.error_no_speech)
             } else {
                 if (state != BubbleFlowState.PROCESSING) {
                     state = BubbleFlowState.PROCESSING
@@ -129,6 +134,11 @@ class OverlayBubbleService : Service() {
         override fun onError(error: Int) {
             if (finalDelivered) return
             if (state != BubbleFlowState.PROCESSING && state != BubbleFlowState.RECORDING) return
+            if (isCallAudioActive()) {
+                finalDelivered = true
+                setError(R.string.error_mic_in_call)
+                return
+            }
             // After stopListening we still wait briefly for a final result; otherwise fail fast.
             if (state == BubbleFlowState.PROCESSING && waitingForFinal) {
                 val fallback = lastPartial?.trim()?.takeIf { it.isNotEmpty() }
@@ -465,6 +475,10 @@ class OverlayBubbleService : Service() {
             setError(R.string.error_mic_permission)
             return
         }
+        if (isCallAudioActive()) {
+            setError(R.string.error_mic_in_call)
+            return
+        }
         if (!SpeechRecognizer.isRecognitionAvailable(this)) {
             setError(R.string.error_speech_unavailable)
             return
@@ -485,11 +499,11 @@ class OverlayBubbleService : Service() {
             recognizer.startListening(intent)
         } catch (_: SecurityException) {
             destroyRecognizer()
-            setError(R.string.error_mic_blocked)
+            setError(if (isCallAudioActive()) R.string.error_mic_in_call else R.string.error_mic_blocked)
             return
         } catch (_: IllegalStateException) {
             destroyRecognizer()
-            setError(R.string.error_mic_blocked)
+            setError(if (isCallAudioActive()) R.string.error_mic_in_call else R.string.error_mic_blocked)
             return
         } catch (_: IllegalArgumentException) {
             destroyRecognizer()
@@ -514,6 +528,15 @@ class OverlayBubbleService : Service() {
         }
         return runCatching { SpeechRecognizer.createSpeechRecognizer(this) }.getOrNull()
     }
+
+    private fun isCallAudioActive(): Boolean = runCatching {
+        when ((getSystemService(Context.AUDIO_SERVICE) as AudioManager).mode) {
+            AudioManager.MODE_IN_CALL,
+            AudioManager.MODE_IN_COMMUNICATION,
+            AudioManager.MODE_CALL_SCREENING -> true
+            else -> false
+        }
+    }.getOrDefault(false)
 
     private fun buildRecognizerIntent(mode: RecordingMode): Intent {
         val completeSilenceMs = if (mode == RecordingMode.TAP_TO_TOGGLE) {

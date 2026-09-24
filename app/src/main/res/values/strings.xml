@@ -121,6 +121,7 @@
     <string name="error_speech_unavailable">Speech service unavailable — check Google speech services</string>
     <string name="error_speech_busy">Speech service busy — try again</string>
     <string name="error_mic_permission">Microphone permission needed — allow it in VoiceTyping</string>
+    <string name="error_mic_in_call">Microphone is in use by a call — try again after the call ends</string>
     <string name="error_mic_blocked">Microphone unavailable — close other recording apps</string>
     <string name="error_copy_failed">Copy failed — tap the mic and try again</string>
     <string name="error_speech_failed">Speech recognition failed — try again</string>
