@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-    <solid android:color="@color/surface_raised" />
+    <solid android:color="?attr/vtSurface" />
     <corners android:radius="@dimen/radius_field" />
-    <stroke android:width="@dimen/hairline" android:color="@color/hairline" />
+    <stroke android:width="@dimen/hairline" android:color="?attr/vtHairline" />
 </shape>

@@ -37,6 +37,12 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var tapOption: RadioButton
     private lateinit var bubbleVisibilityGroup: RadioGroup
     private lateinit var keyboardVisibleOption: RadioButton
+    private lateinit var themeGroup: RadioGroup
+    private lateinit var themeLagoonOption: RadioButton
+    private lateinit var themeSignalOption: RadioButton
+    private lateinit var batteryStatus: TextView
+    private lateinit var batteryAction: Button
+    private lateinit var autostartRow: LinearLayout
     private lateinit var apiKeyField: EditText
     private lateinit var modelField: EditText
     private lateinit var visibilityButton: Button
@@ -47,8 +53,11 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var saveStatusText: TextView
     private var apiKeyVisible = false
     private var advancedExpanded = false
+    private var appliedTheme = AppTheme.AMBER
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        appliedTheme = AppSettingsStore(this).readTheme()
+        setTheme(appliedTheme.styleRes())
         super.onCreate(savedInstanceState)
         store = AppSettingsStore(this)
         setContentView(R.layout.activity_settings)
@@ -58,6 +67,12 @@ class SettingsActivity : AppCompatActivity() {
         tapOption = findViewById(R.id.mode_tap)
         bubbleVisibilityGroup = findViewById(R.id.bubble_visibility_group)
         keyboardVisibleOption = findViewById(R.id.bubble_visibility_keyboard)
+        themeGroup = findViewById(R.id.theme_group)
+        themeLagoonOption = findViewById(R.id.theme_lagoon)
+        themeSignalOption = findViewById(R.id.theme_signal)
+        batteryStatus = findViewById(R.id.background_battery_status)
+        batteryAction = findViewById(R.id.background_battery_action)
+        autostartRow = findViewById(R.id.background_autostart_row)
         apiKeyField = findViewById(R.id.api_key_field)
         modelField = findViewById(R.id.model_field)
         visibilityButton = findViewById(R.id.api_key_visibility)
@@ -98,6 +113,15 @@ class SettingsActivity : AppCompatActivity() {
         )
         bubbleVisibilityGroup.setOnCheckedChangeListener { _, _ -> hideSaveStatus() }
 
+        themeGroup.check(
+            when (settings.theme) {
+                AppTheme.LAGOON -> R.id.theme_lagoon
+                AppTheme.SIGNAL -> R.id.theme_signal
+                AppTheme.AMBER -> R.id.theme_amber
+            },
+        )
+        themeGroup.setOnCheckedChangeListener { _, _ -> hideSaveStatus() }
+
         apiKeyField.setText(settings.apiKey)
         apiKeyField.transformationMethod = PasswordTransformationMethod.getInstance()
         modelField.hint = AppSettings.DEFAULT_REFINEMENT_MODEL
@@ -112,8 +136,38 @@ class SettingsActivity : AppCompatActivity() {
         findViewById<LinearLayout>(R.id.advanced_row).setOnClickListener { toggleAdvanced() }
         findViewById<Button>(R.id.save_action).setOnClickListener { save() }
 
+        batteryAction.setOnClickListener { BackgroundAccess.openBatterySettings(this) }
+        bindAutostartRow()
+
         applyEdgeToEdgeInsets()
         applyAdvancedExpansion()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        bindBatteryRow()
+    }
+
+    private fun bindBatteryRow() {
+        val exempt = BackgroundAccess.isBatteryExempt(this)
+        batteryStatus.setText(
+            if (exempt) R.string.background_battery_exempt else R.string.background_battery_restricted,
+        )
+        batteryStatus.setTextColor(
+            if (exempt) getColor(R.color.success_mint) else themeColor(R.attr.vtWarningText),
+        )
+        batteryAction.visibility = if (exempt) View.GONE else View.VISIBLE
+    }
+
+    /** Nothing can read the vendor's autostart setting, so the row only ever offers to open it. */
+    private fun bindAutostartRow() {
+        if (!BackgroundAccess.hasVendorAutostartList()) {
+            autostartRow.visibility = View.GONE
+            return
+        }
+        findViewById<Button>(R.id.background_autostart_action).setOnClickListener {
+            BackgroundAccess.openAutostartSettings(this)
+        }
     }
 
     private fun applyEdgeToEdgeInsets() {
@@ -149,7 +203,7 @@ class SettingsActivity : AppCompatActivity() {
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
             )
             setSpan(
-                ForegroundColorSpan(getColor(R.color.ink_muted)),
+                ForegroundColorSpan(themeColor(R.attr.vtInkMuted)),
                 detailStart,
                 length,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
@@ -161,7 +215,7 @@ class SettingsActivity : AppCompatActivity() {
         "${getString(titleRes)}. ${getString(detailRes)} ${getString(diagramRes)}"
 
     private fun tintDiagram(option: RadioButton) {
-        TextViewCompat.setCompoundDrawableTintList(option, ColorStateList.valueOf(getColor(R.color.ink)))
+        TextViewCompat.setCompoundDrawableTintList(option, ColorStateList.valueOf(themeColor(R.attr.vtInk)))
     }
 
     private fun toggleApiKeyVisibility() {
@@ -195,6 +249,11 @@ class SettingsActivity : AppCompatActivity() {
         } else {
             RecordingMode.HOLD_TO_RECORD
         }
+        val chosenTheme = when (themeGroup.checkedRadioButtonId) {
+            themeLagoonOption.id -> AppTheme.LAGOON
+            themeSignalOption.id -> AppTheme.SIGNAL
+            else -> AppTheme.AMBER
+        }
         val saved = store.save(
             AppSettings(
                 recordingMode = mode,
@@ -205,6 +264,7 @@ class SettingsActivity : AppCompatActivity() {
                 } else {
                     BubbleVisibilityMode.ALWAYS_SHOW
                 },
+                theme = chosenTheme,
                 apiKey = apiKeyField.text.toString(),
                 refinementModel = modelField.text.toString(),
             ),
@@ -216,6 +276,9 @@ class SettingsActivity : AppCompatActivity() {
             )
         }
         showSaveStatus(saved)
+        // Recreating is the only way an open window picks up a different theme. Do it last so
+        // the saved state is already written and the bubble has been told.
+        if (saved && chosenTheme != appliedTheme) recreate()
     }
 
     private fun showSaveStatus(saved: Boolean) {

@@ -2,23 +2,23 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_focused="true">
         <shape android:shape="rectangle">
-            <solid android:color="@color/signal_blue_wash" />
+            <solid android:color="?attr/vtAccentWash" />
             <corners android:radius="@dimen/radius_field" />
-            <stroke android:width="2dp" android:color="@color/signal_blue" />
+            <stroke android:width="2dp" android:color="?attr/vtAccent" />
         </shape>
     </item>
     <item android:state_checked="true">
         <shape android:shape="rectangle">
-            <solid android:color="@color/signal_blue_wash" />
+            <solid android:color="?attr/vtAccentWash" />
             <corners android:radius="@dimen/radius_field" />
-            <stroke android:width="2dp" android:color="@color/signal_blue" />
+            <stroke android:width="2dp" android:color="?attr/vtAccent" />
         </shape>
     </item>
     <item>
         <shape android:shape="rectangle">
             <solid android:color="@android:color/transparent" />
             <corners android:radius="@dimen/radius_field" />
-            <stroke android:width="@dimen/hairline" android:color="@color/hairline" />
+            <stroke android:width="@dimen/hairline" android:color="?attr/vtHairline" />
         </shape>
     </item>
 </selector>

@@ -1,15 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ink">#ECEFF4</color>
-    <color name="ink_muted">#B3ECEFF4</color>
-    <color name="canvas">#101317</color>
-    <color name="surface_raised">#1A1F26</color>
-    <color name="hairline">#29ECEFF4</color>
-    <color name="signal_blue">#7BA4F2</color>
-    <color name="signal_blue_wash">#1F7BA4F2</color>
+    <color name="signal_canvas">#101317</color>
+    <color name="signal_surface">#1A1F26</color>
+    <color name="signal_ink">#ECEFF4</color>
+    <color name="signal_ink_muted">#B3ECEFF4</color>
+    <color name="signal_hairline">#29ECEFF4</color>
+    <color name="signal_accent">#7BA4F2</color>
+    <color name="signal_accent_wash">#1F7BA4F2</color>
+    <color name="signal_on_accent">#101317</color>
+
+    <color name="amber_canvas">#16120C</color>
+    <color name="amber_surface">#211B13</color>
+    <color name="amber_ink">#F2EDE4</color>
+    <color name="amber_ink_muted">#B3F2EDE4</color>
+    <color name="amber_hairline">#29F2EDE4</color>
+    <color name="amber_accent">#F0A93C</color>
+    <color name="amber_accent_wash">#1FF0A93C</color>
+    <color name="amber_on_accent">#16120C</color>
+    <color name="amber_warning">#F08A7E</color>
+    <color name="amber_warning_text">#F08A7E</color>
+
+    <color name="lagoon_canvas">#0C1518</color>
+    <color name="lagoon_surface">#152226</color>
+    <color name="lagoon_ink">#E6F0F2</color>
+    <color name="lagoon_ink_muted">#B3E6F0F2</color>
+    <color name="lagoon_hairline">#29E6F0F2</color>
+    <color name="lagoon_accent">#5EC8D8</color>
+    <color name="lagoon_accent_wash">#1F5EC8D8</color>
+    <color name="lagoon_on_accent">#0C1518</color>
+
     <color name="recording_coral">#FF8A80</color>
     <color name="success_mint">#5FD3A0</color>
     <color name="warning_amber">#E0A94A</color>
     <color name="warning_amber_text">#E0A94A</color>
-    <color name="on_accent">#101317</color>
 </resources>
