@@ -57,7 +57,7 @@ class SignalRailView @JvmOverloads constructor(
         style = Paint.Style.STROKE
         strokeWidth = dp(1.9f)
         strokeCap = Paint.Cap.ROUND
-        color = context.getColor(R.color.on_accent)
+        color = context.themeColor(R.attr.vtOnAccent)
     }
     private val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         textSize = sp(14f)
@@ -67,10 +67,10 @@ class SignalRailView @JvmOverloads constructor(
     private val nodeCenters = FloatArray(SignalStage.entries.size)
 
     private val doneColor = context.getColor(R.color.success_mint)
-    private val currentColor = context.getColor(R.color.signal_blue)
-    private val aheadColor = context.getColor(R.color.hairline)
-    private val inkColor = context.getColor(R.color.ink)
-    private val mutedColor = context.getColor(R.color.ink_muted)
+    private val currentColor = context.themeColor(R.attr.vtAccent)
+    private val aheadColor = context.themeColor(R.attr.vtHairline)
+    private val inkColor = context.themeColor(R.attr.vtInk)
+    private val mutedColor = context.themeColor(R.attr.vtInkMuted)
 
     private var states = SignalStage.entries.map { StageState.AHEAD }
 

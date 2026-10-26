@@ -1,19 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Field-recorder palette. Night variants live in values-night/colors.xml. -->
-    <color name="ink">#15191F</color>
-    <color name="ink_muted">#A315191F</color>
-    <color name="canvas">#F5F7FA</color>
-    <color name="surface_raised">#FFFFFF</color>
-    <color name="hairline">#1F15191F</color>
-    <color name="signal_blue">#2864DC</color>
-    <color name="signal_blue_wash">#142864DC</color>
+    <!--
+      Per-theme grounds and accents. Layouts and code read these through the vt* attributes in
+      attrs.xml, never by name. Night variants live in values-night/colors.xml.
+    -->
+
+    <!-- Signal: the original field-recorder palette. -->
+    <color name="signal_canvas">#F5F7FA</color>
+    <color name="signal_surface">#FFFFFF</color>
+    <color name="signal_ink">#15191F</color>
+    <color name="signal_ink_muted">#A315191F</color>
+    <color name="signal_hairline">#1F15191F</color>
+    <color name="signal_accent">#2864DC</color>
+    <color name="signal_accent_wash">#142864DC</color>
+    <color name="signal_on_accent">#FFFFFF</color>
+
+    <!-- Amber. Warning moves off amber here so it cannot be mistaken for the accent. -->
+    <color name="amber_canvas">#FAF7F1</color>
+    <color name="amber_surface">#FFFFFF</color>
+    <color name="amber_ink">#1C1814</color>
+    <color name="amber_ink_muted">#A31C1814</color>
+    <color name="amber_hairline">#1F1C1814</color>
+    <color name="amber_accent">#A85B11</color>
+    <color name="amber_accent_wash">#14A85B11</color>
+    <color name="amber_on_accent">#FFFFFF</color>
+    <!-- Indicator fill only. -->
+    <color name="amber_warning">#962B22</color>
+    <!-- Body copy variant. -->
+    <color name="amber_warning_text">#8C281F</color>
+
+    <!-- Lagoon. -->
+    <color name="lagoon_canvas">#F1F6F7</color>
+    <color name="lagoon_surface">#FFFFFF</color>
+    <color name="lagoon_ink">#121D20</color>
+    <color name="lagoon_ink_muted">#A3121D20</color>
+    <color name="lagoon_hairline">#1F121D20</color>
+    <color name="lagoon_accent">#0D6E7A</color>
+    <color name="lagoon_accent_wash">#140D6E7A</color>
+    <color name="lagoon_on_accent">#FFFFFF</color>
+
+    <!-- Roles that mean the same thing in every theme. -->
     <color name="recording_coral">#E75555</color>
     <color name="success_mint">#2A9D72</color>
     <!-- Indicator fill only: 3.29:1 on canvas passes for icons and large text, not body copy. -->
     <color name="warning_amber">#B7791F</color>
     <!-- Body copy variant: 6.0:1 on canvas. -->
     <color name="warning_amber_text">#8A5700</color>
-    <color name="on_accent">#FFFFFF</color>
     <color name="white">#FFFFFF</color>
+
+    <!-- The launcher icon cannot follow the in-app theme, so it stays on the default theme's accent. -->
+    <color name="ic_launcher_background">#A85B11</color>
 </resources>

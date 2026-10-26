@@ -10,13 +10,13 @@
         android:id="@+id/settings_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/canvas"
+        android:background="?attr/vtCanvas"
         android:minHeight="?attr/actionBarSize"
         app:navigationContentDescription="@string/action_back"
         app:navigationIcon="@drawable/ic_arrow_back"
         app:title="@string/settings_title"
         app:titleCentered="false"
-        app:titleTextColor="@color/ink" />
+        app:titleTextColor="?attr/vtInk" />
 
     <ScrollView
         android:id="@+id/settings_scroll"
@@ -50,7 +50,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/bg_mode_option"
-                    android:buttonTint="@color/signal_blue"
+                    android:buttonTint="?attr/vtAccent"
                     android:drawableEnd="@drawable/ic_gesture_hold"
                     android:drawablePadding="@dimen/space_3"
                     android:minHeight="@dimen/touch_min"
@@ -66,7 +66,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_2"
                     android:background="@drawable/bg_mode_option"
-                    android:buttonTint="@color/signal_blue"
+                    android:buttonTint="?attr/vtAccent"
                     android:drawableEnd="@drawable/ic_gesture_tap"
                     android:drawablePadding="@dimen/space_3"
                     android:minHeight="@dimen/touch_min"
@@ -89,7 +89,7 @@
                     android:layout_marginTop="2dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_info"
-                    app:tint="@color/ink_muted" />
+                    app:tint="?attr/vtInkMuted" />
 
                 <TextView
                     android:layout_width="0dp"
@@ -104,7 +104,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/hairline"
                 android:layout_marginTop="@dimen/space_5"
-                android:background="@color/hairline" />
+                android:background="?attr/vtHairline" />
 
             <TextView
                 style="@style/Widget.VoiceTyping.SectionLabel"
@@ -123,7 +123,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/bg_mode_option"
-                    android:buttonTint="@color/signal_blue"
+                    android:buttonTint="?attr/vtAccent"
                     android:minHeight="@dimen/touch_min"
                     android:padding="@dimen/space_3"
                     android:text="@string/bubble_visibility_always"
@@ -135,7 +135,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_2"
                     android:background="@drawable/bg_mode_option"
-                    android:buttonTint="@color/signal_blue"
+                    android:buttonTint="?attr/vtAccent"
                     android:minHeight="@dimen/touch_min"
                     android:padding="@dimen/space_3"
                     android:text="@string/bubble_visibility_keyboard"
@@ -153,7 +153,152 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/hairline"
                 android:layout_marginTop="@dimen/space_5"
-                android:background="@color/hairline" />
+                android:background="?attr/vtHairline" />
+
+            <TextView
+                style="@style/Widget.VoiceTyping.SectionLabel"
+                android:layout_marginTop="@dimen/space_3"
+                android:layout_marginBottom="@dimen/space_2"
+                android:text="@string/settings_theme_label" />
+
+            <RadioGroup
+                android:id="@+id/theme_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/theme_amber"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_mode_option"
+                    android:buttonTint="?attr/vtAccent"
+                    android:minHeight="@dimen/touch_min"
+                    android:padding="@dimen/space_3"
+                    android:text="@string/theme_amber"
+                    android:textAppearance="@style/TextAppearance.VoiceTyping.Body" />
+
+                <RadioButton
+                    android:id="@+id/theme_lagoon"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_2"
+                    android:background="@drawable/bg_mode_option"
+                    android:buttonTint="?attr/vtAccent"
+                    android:minHeight="@dimen/touch_min"
+                    android:padding="@dimen/space_3"
+                    android:text="@string/theme_lagoon"
+                    android:textAppearance="@style/TextAppearance.VoiceTyping.Body" />
+
+                <RadioButton
+                    android:id="@+id/theme_signal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_2"
+                    android:background="@drawable/bg_mode_option"
+                    android:buttonTint="?attr/vtAccent"
+                    android:minHeight="@dimen/touch_min"
+                    android:padding="@dimen/space_3"
+                    android:text="@string/theme_signal"
+                    android:textAppearance="@style/TextAppearance.VoiceTyping.Body" />
+            </RadioGroup>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_2"
+                android:text="@string/theme_note"
+                android:textAppearance="@style/TextAppearance.VoiceTyping.Caption" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/hairline"
+                android:layout_marginTop="@dimen/space_5"
+                android:background="?attr/vtHairline" />
+
+            <TextView
+                style="@style/Widget.VoiceTyping.SectionLabel"
+                android:layout_marginTop="@dimen/space_3"
+                android:layout_marginBottom="@dimen/space_2"
+                android:text="@string/settings_background_label" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:minHeight="@dimen/touch_min"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/background_battery_title"
+                        android:textAppearance="@style/TextAppearance.VoiceTyping.Body" />
+
+                    <TextView
+                        android:id="@+id/background_battery_status"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textAppearance="@style/TextAppearance.VoiceTyping.Caption" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/background_battery_action"
+                    style="@style/Widget.VoiceTyping.Button.Inline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/action_open" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/background_autostart_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_2"
+                android:gravity="center_vertical"
+                android:minHeight="@dimen/touch_min"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/background_autostart_title"
+                        android:textAppearance="@style/TextAppearance.VoiceTyping.Body" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/background_autostart_body"
+                        android:textAppearance="@style/TextAppearance.VoiceTyping.Caption" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/background_autostart_action"
+                    style="@style/Widget.VoiceTyping.Button.Inline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/action_open" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/hairline"
+                android:layout_marginTop="@dimen/space_5"
+                android:background="?attr/vtHairline" />
 
             <!-- Advanced: AI refinement. Collapsed by default; refinement is optional. -->
             <LinearLayout
@@ -192,7 +337,7 @@
                     android:layout_gravity="center_vertical"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_chevron_down"
-                    app:tint="@color/ink_muted" />
+                    app:tint="?attr/vtInkMuted" />
             </LinearLayout>
 
             <LinearLayout
@@ -254,7 +399,7 @@
                         android:layout_marginTop="2dp"
                         android:importantForAccessibility="no"
                         android:src="@drawable/ic_warning"
-                        app:tint="@color/warning_amber_text" />
+                        app:tint="?attr/vtWarningText" />
 
                     <TextView
                         android:layout_width="0dp"
@@ -263,7 +408,7 @@
                         android:layout_weight="1"
                         android:text="@string/api_key_warning"
                         android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
-                        android:textColor="@color/warning_amber_text" />
+                        android:textColor="?attr/vtWarningText" />
                 </LinearLayout>
 
                 <TextView

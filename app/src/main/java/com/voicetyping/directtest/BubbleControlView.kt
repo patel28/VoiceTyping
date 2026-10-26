@@ -61,7 +61,7 @@ class BubbleControlView(context: Context) : FrameLayout(context) {
 
         when (state) {
             BubbleFlowState.IDLE -> {
-                tint(R.color.signal_blue)
+                tintAttr(R.attr.vtAccent)
                 showGlyph(R.drawable.ic_mic, GLYPH_STANDARD_DP)
                 timer.visibility = View.GONE
                 contentDescription = context.getString(
@@ -90,7 +90,7 @@ class BubbleControlView(context: Context) : FrameLayout(context) {
             }
 
             BubbleFlowState.PROCESSING -> {
-                tint(R.color.signal_blue)
+                tintAttr(R.attr.vtAccent)
                 stack.visibility = View.GONE
                 timer.visibility = View.GONE
                 arc.visibility = View.VISIBLE
@@ -106,8 +106,9 @@ class BubbleControlView(context: Context) : FrameLayout(context) {
             }
 
             BubbleFlowState.ERROR -> {
-                // Amber, not coral: coral already means "recording" on this control.
-                tint(R.color.warning_amber)
+                // The theme's warning colour, never coral: coral already means "recording"
+                // on this control, and every theme keeps the two apart by lightness.
+                tintAttr(R.attr.vtWarning)
                 showGlyph(R.drawable.ic_warning, GLYPH_STANDARD_DP)
                 timer.visibility = View.GONE
                 contentDescription = context.getString(R.string.bubble_a11y_error)
@@ -137,6 +138,10 @@ class BubbleControlView(context: Context) : FrameLayout(context) {
 
     private fun tint(colorRes: Int) {
         backgroundTintList = ColorStateList.valueOf(context.getColor(colorRes))
+    }
+
+    private fun tintAttr(attrRes: Int) {
+        backgroundTintList = ColorStateList.valueOf(context.themeColor(attrRes))
     }
 
     /**

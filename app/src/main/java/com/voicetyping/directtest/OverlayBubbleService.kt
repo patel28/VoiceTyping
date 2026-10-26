@@ -14,6 +14,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
+import android.view.ContextThemeWrapper
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.media.AudioManager
@@ -49,6 +50,8 @@ class OverlayBubbleService : Service() {
     private val mainHandler = Handler(Looper.getMainLooper())
     private lateinit var windowManager: WindowManager
     private lateinit var appSettingsStore: AppSettingsStore
+    private lateinit var themedContext: Context
+    private var appliedTheme = AppTheme.AMBER
     private var bubble: BubbleControlView? = null
     private var bubbleLayoutParams: WindowManager.LayoutParams? = null
     private var imeObserver: View? = null
@@ -162,6 +165,7 @@ class OverlayBubbleService : Service() {
         startForegroundForOverlayAndMicrophone()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         appSettingsStore = AppSettingsStore(this)
+        applyTheme(appSettingsStore.readTheme())
         if (Settings.canDrawOverlays(this)) attachBubble() else stopSelf()
     }
 
@@ -169,12 +173,15 @@ class OverlayBubbleService : Service() {
         when (intent?.action) {
             ACTION_STOP -> stopSelf()
             ACTION_REFRESH_VISIBILITY -> {
+                reattachIfThemeChanged()
                 imeObserver?.let(ViewCompat::requestApplyInsets)
                 applyBubbleVisibility()
             }
             ACTION_START, null -> if (bubble == null && Settings.canDrawOverlays(this)) attachBubble()
         }
-        return START_NOT_STICKY
+        // Sticky so Android brings the control back after a low-memory kill. The user stops it
+        // explicitly with ACTION_STOP, which calls stopSelf and opts out of the restart.
+        return START_STICKY
     }
 
     private fun startForegroundForOverlayAndMicrophone() {
@@ -191,11 +198,32 @@ class OverlayBubbleService : Service() {
         }
     }
 
+    /** The bubble is drawn by this service, so it needs the theme a window would have given it. */
+    private fun applyTheme(theme: AppTheme) {
+        appliedTheme = theme
+        themedContext = ContextThemeWrapper(this, theme.styleRes())
+    }
+
+    private fun reattachIfThemeChanged() {
+        val saved = appSettingsStore.readTheme()
+        if (saved == appliedTheme) return
+        applyTheme(saved)
+        // Colours are read when the views are inflated, so the control has to be rebuilt.
+        bubble?.let { runCatching { windowManager.removeView(it) } }
+        bubble = null
+        bubbleLayoutParams = null
+        imeObserver?.let { runCatching { windowManager.removeView(it) } }
+        imeObserver = null
+        removeCopiedDragGuide()
+        removeFirstUseHint()
+        if (Settings.canDrawOverlays(this)) attachBubble()
+    }
+
     private fun attachBubble() {
         if (bubble != null) return
         state = if (ClipboardStateStore.read() != null) BubbleFlowState.COPIED else BubbleFlowState.IDLE
         attachImeObserver()
-        val view = BubbleControlView(this)
+        val view = BubbleControlView(themedContext)
         view.visibility = if (shouldShowBubble()) View.VISIBLE else View.GONE
         val params = WindowManager.LayoutParams(
             dp(BUBBLE_SIZE_DP),
@@ -408,7 +436,7 @@ class OverlayBubbleService : Service() {
      */
     private fun showCopiedDragGuide() {
         if (dragGuide != null) return
-        val guide = LayoutInflater.from(this).inflate(R.layout.overlay_drag_strip, null)
+        val guide = LayoutInflater.from(themedContext).inflate(R.layout.overlay_drag_strip, null)
         val guideParams = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT,
@@ -437,7 +465,7 @@ class OverlayBubbleService : Service() {
         val preferences = getSharedPreferences(UI_PREFERENCES_NAME, MODE_PRIVATE)
         if (preferences.getBoolean(KEY_FIRST_USE_HINT_SHOWN, false)) return
         preferences.edit { putBoolean(KEY_FIRST_USE_HINT_SHOWN, true) }
-        val hint = LayoutInflater.from(this).inflate(R.layout.overlay_first_use_hint, null) as TextView
+        val hint = LayoutInflater.from(themedContext).inflate(R.layout.overlay_first_use_hint, null) as TextView
         hint.setText(
             if (currentRecordingMode() == RecordingMode.TAP_TO_TOGGLE) {
                 R.string.hint_first_use_tap

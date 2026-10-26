@@ -38,6 +38,18 @@
     <string name="api_key_missing_warning_body">No API key is saved. If the local development service is unavailable, raw transcript is copied without grammar, sentence-completion, or contextual refinement.</string>
     <string name="api_key_missing_warning_a11y">Refinement is not configured. No API key is saved. If the local development service is unavailable, raw transcript is copied without grammar, sentence-completion, or contextual refinement. Open Settings.</string>
 
+    <!-- Background survival -->
+    <string name="background_warning_title">The floating mic may be stopped</string>
+    <string name="background_warning_body">Battery optimisation is on for VoiceTyping. Android can stop the floating mic while the screen is off. Open the list and set VoiceTyping to unrestricted.</string>
+    <string name="background_warning_a11y">The floating mic may be stopped. Battery optimisation is on for VoiceTyping. Android can stop the floating mic while the screen is off. Open the list and set VoiceTyping to unrestricted. Open the battery optimisation list and set VoiceTyping to unrestricted.</string>
+    <string name="settings_background_label">Keep running in the background</string>
+    <string name="background_battery_title">Battery optimisation</string>
+    <string name="background_battery_exempt">Allowed</string>
+    <string name="background_battery_restricted">Restricted</string>
+    <string name="background_autostart_title">Autostart</string>
+    <string name="background_autostart_body">Xiaomi, Redmi and POCO phones stop apps that are not on the autostart list, even with a notification showing. Turn VoiceTyping on there as well.</string>
+    <string name="action_open">Open</string>
+
     <!-- Recording mode summary -->
     <string name="mode_summary">Mode · %1$s</string>
     <string name="mode_hold">Hold and release</string>
@@ -68,6 +80,11 @@
     <string name="bubble_visibility_always">Always show</string>
     <string name="bubble_visibility_keyboard">Show with keyboard — Experimental</string>
     <string name="bubble_visibility_note">Best effort: keyboard detection varies by keyboard and device. Floating or hardware keyboards may not be detected.</string>
+    <string name="settings_theme_label">Theme</string>
+    <string name="theme_amber">Amber</string>
+    <string name="theme_lagoon">Lagoon</string>
+    <string name="theme_signal">Signal</string>
+    <string name="theme_note">Applies to the app and the floating mic. Light and dark follow the system setting.</string>
     <string name="mode_hold_detail">Hold the floating mic, speak, release to finish.</string>
     <string name="mode_tap_detail">Tap once to start, tap again to finish.</string>
     <string name="recording_limit_note">A recording can run for up to 2 minutes. Some Android speech services stop after a long silence.</string>

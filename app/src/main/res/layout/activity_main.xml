@@ -47,7 +47,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/action_settings"
             android:src="@drawable/ic_settings"
-            app:tint="@color/ink_muted" />
+            app:tint="?attr/vtInkMuted" />
     </LinearLayout>
 
     <ScrollView
@@ -88,7 +88,7 @@
                         android:layout_gravity="center_vertical"
                         android:importantForAccessibility="no"
                         android:src="@drawable/ic_warning"
-                        app:tint="@color/warning_amber" />
+                        app:tint="?attr/vtWarning" />
 
                     <TextView
                         android:id="@+id/readiness_headline"
@@ -99,7 +99,7 @@
                         android:layout_weight="1"
                         android:text="@string/state_setup_required"
                         android:textAppearance="@style/TextAppearance.VoiceTyping.SectionLabel"
-                        android:textColor="@color/ink" />
+                        android:textColor="?attr/vtInk" />
                 </LinearLayout>
 
                 <com.voicetyping.directtest.SignalRailView
@@ -113,7 +113,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/hairline"
                     android:layout_marginBottom="@dimen/space_1"
-                    android:background="@color/hairline" />
+                    android:background="?attr/vtHairline" />
 
                 <!-- Microphone permission -->
                 <LinearLayout
@@ -130,7 +130,7 @@
                         android:layout_gravity="center_vertical"
                         android:importantForAccessibility="no"
                         android:src="@drawable/ic_mic"
-                        app:tint="@color/ink_muted" />
+                        app:tint="?attr/vtInkMuted" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -178,7 +178,7 @@
                         android:layout_gravity="center_vertical"
                         android:importantForAccessibility="no"
                         android:src="@drawable/ic_overlay"
-                        app:tint="@color/ink_muted" />
+                        app:tint="?attr/vtInkMuted" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -252,7 +252,7 @@
                         android:contentDescription="@null"
                         android:importantForAccessibility="no"
                         android:src="@drawable/ic_warning"
-                        app:tint="@color/warning_amber" />
+                        app:tint="?attr/vtWarning" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -267,7 +267,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/api_key_missing_warning_title"
                             android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue"
-                            android:textColor="@color/warning_amber_text" />
+                            android:textColor="?attr/vtWarningText" />
 
                         <TextView
                             android:layout_width="match_parent"
@@ -275,7 +275,7 @@
                             android:layout_marginTop="2dp"
                             android:text="@string/api_key_missing_warning_body"
                             android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
-                            android:textColor="@color/ink" />
+                            android:textColor="?attr/vtInk" />
                     </LinearLayout>
 
                     <TextView
@@ -287,7 +287,69 @@
                         android:paddingEnd="@dimen/space_1"
                         android:text="@string/action_open_settings"
                         android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue"
-                        android:textColor="@color/signal_blue" />
+                        android:textColor="?attr/vtAccent" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/background_restricted_warning"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_2"
+                    android:background="@drawable/bg_wash_pill"
+                    android:clickable="true"
+                    android:contentDescription="@string/background_warning_a11y"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:minHeight="@dimen/touch_min"
+                    android:orientation="horizontal"
+                    android:paddingStart="@dimen/space_3"
+                    android:paddingTop="@dimen/space_2"
+                    android:paddingEnd="@dimen/space_2"
+                    android:paddingBottom="@dimen/space_2">
+
+                    <ImageView
+                        android:layout_width="@dimen/icon_row"
+                        android:layout_height="@dimen/icon_row"
+                        android:contentDescription="@null"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_warning"
+                        app:tint="?attr/vtWarning" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_2"
+                        android:layout_weight="1"
+                        android:importantForAccessibility="no"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/background_warning_title"
+                            android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue"
+                            android:textColor="?attr/vtWarningText" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/background_warning_body"
+                            android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
+                            android:textColor="?attr/vtInk" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/touch_min"
+                        android:gravity="center"
+                        android:importantForAccessibility="no"
+                        android:paddingStart="@dimen/space_2"
+                        android:paddingEnd="@dimen/space_1"
+                        android:text="@string/action_open"
+                        android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue"
+                        android:textColor="?attr/vtAccent" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -312,7 +374,7 @@
                         android:layout_gravity="center_vertical"
                         android:importantForAccessibility="no"
                         android:src="@drawable/ic_chevron_right"
-                        app:tint="@color/ink_muted" />
+                        app:tint="?attr/vtInkMuted" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -340,7 +402,7 @@
                         android:layout_height="@dimen/icon_step"
                         android:importantForAccessibility="no"
                         android:src="@drawable/ic_field"
-                        app:tint="@color/ink" />
+                        app:tint="?attr/vtInk" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -348,7 +410,7 @@
                         android:paddingTop="@dimen/space_2"
                         android:text="@string/step_focus"
                         android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
-                        android:textColor="@color/ink" />
+                        android:textColor="?attr/vtInk" />
                 </LinearLayout>
 
                 <ImageView
@@ -358,7 +420,7 @@
                     android:layout_marginTop="4dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_chevron_right"
-                    app:tint="@color/ink_muted" />
+                    app:tint="?attr/vtInkMuted" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -373,7 +435,7 @@
                         android:layout_height="@dimen/icon_step"
                         android:importantForAccessibility="no"
                         android:src="@drawable/ic_mic"
-                        app:tint="@color/signal_blue" />
+                        app:tint="?attr/vtAccent" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -381,7 +443,7 @@
                         android:paddingTop="@dimen/space_2"
                         android:text="@string/step_speak"
                         android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
-                        android:textColor="@color/ink" />
+                        android:textColor="?attr/vtInk" />
                 </LinearLayout>
 
                 <ImageView
@@ -391,7 +453,7 @@
                     android:layout_marginTop="4dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_chevron_right"
-                    app:tint="@color/ink_muted" />
+                    app:tint="?attr/vtInkMuted" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -406,7 +468,7 @@
                         android:layout_height="@dimen/icon_step"
                         android:importantForAccessibility="no"
                         android:src="@drawable/ic_paste"
-                        app:tint="@color/ink" />
+                        app:tint="?attr/vtInk" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -414,7 +476,7 @@
                         android:paddingTop="@dimen/space_2"
                         android:text="@string/step_paste"
                         android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
-                        android:textColor="@color/ink" />
+                        android:textColor="?attr/vtInk" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -429,7 +491,7 @@
                 android:paddingEnd="@dimen/space_3"
                 android:paddingBottom="@dimen/space_2"
                 android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
-                android:textColor="@color/ink" />
+                android:textColor="?attr/vtInk" />
 
             <!-- Privacy disclosure -->
             <LinearLayout
@@ -455,7 +517,7 @@
                     android:layout_gravity="center_vertical"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_chevron_down"
-                    app:tint="@color/ink_muted" />
+                    app:tint="?attr/vtInkMuted" />
             </LinearLayout>
 
             <TextView
@@ -471,7 +533,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/hairline"
                 android:layout_marginTop="@dimen/space_2"
-                android:background="@color/hairline" />
+                android:background="?attr/vtHairline" />
 
             <!-- Paste sandbox -->
             <TextView

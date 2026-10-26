@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Themed tokens. Every surface colour that differs between the Amber, Lagoon and Signal
+      themes is read through one of these, never through @color directly, so a theme swap is
+      a single setTheme call. Roles that mean the same thing in every theme - recording coral
+      and success mint - stay plain colours.
+    -->
+    <attr name="vtCanvas" format="color" />
+    <attr name="vtSurface" format="color" />
+    <attr name="vtInk" format="color" />
+    <attr name="vtInkMuted" format="color" />
+    <attr name="vtHairline" format="color" />
+    <attr name="vtAccent" format="color" />
+    <attr name="vtAccentWash" format="color" />
+    <attr name="vtWarning" format="color" />
+    <attr name="vtWarningText" format="color" />
+    <attr name="vtOnAccent" format="color" />
+</resources>

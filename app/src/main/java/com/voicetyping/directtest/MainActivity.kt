@@ -44,10 +44,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var privacyBody: TextView
     private lateinit var privacyChevron: ImageView
     private lateinit var apiKeyMissingWarning: View
+    private lateinit var backgroundRestrictedWarning: View
     private lateinit var sandboxHelper: TextView
     private var privacyExpanded = false
+    private var appliedTheme = AppTheme.AMBER
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        appliedTheme = AppSettingsStore(this).readTheme()
+        setTheme(appliedTheme.styleRes())
         super.onCreate(savedInstanceState)
         settingsStore = AppSettingsStore(this)
         setContentView(R.layout.activity_main)
@@ -68,11 +72,13 @@ class MainActivity : AppCompatActivity() {
         privacyBody = findViewById(R.id.privacy_body)
         privacyChevron = findViewById(R.id.privacy_chevron)
         apiKeyMissingWarning = findViewById(R.id.api_key_missing_warning)
+        backgroundRestrictedWarning = findViewById(R.id.background_restricted_warning)
         sandboxHelper = findViewById(R.id.sandbox_helper)
 
         findViewById<ImageButton>(R.id.open_settings).setOnClickListener { openSettings() }
         findViewById<LinearLayout>(R.id.mode_summary_row).setOnClickListener { openSettings() }
         apiKeyMissingWarning.setOnClickListener { openSettings() }
+        backgroundRestrictedWarning.setOnClickListener { BackgroundAccess.openBatterySettings(this) }
         findViewById<LinearLayout>(R.id.privacy_row).setOnClickListener { togglePrivacy() }
         micAction.setOnClickListener { requestMicrophone() }
         overlayAction.setOnClickListener { openOverlaySettings() }
@@ -85,6 +91,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        // Settings can change the theme while this screen is stopped; a recreate is the only
+        // way an already-inflated window picks the new one up.
+        if (settingsStore.readTheme() != appliedTheme) {
+            recreate()
+            return
+        }
         refresh()
     }
 
@@ -145,6 +157,10 @@ class MainActivity : AppCompatActivity() {
         bindPermissionRow(micIcon, micStatus, micAction, readiness.micGranted)
         bindPermissionRow(overlayIcon, overlayStatus, overlayAction, readiness.overlayGranted)
         apiKeyMissingWarning.visibility = if (readiness.apiKeySaved) View.GONE else View.VISIBLE
+        // Read live rather than from readiness: the user can change this in system settings
+        // and come straight back, and onResume is the only signal we get.
+        backgroundRestrictedWarning.visibility =
+            if (BackgroundAccess.isBatteryExempt(this)) View.GONE else View.VISIBLE
 
         signalRail.render(railStates(ready, readiness.resultCopied))
         bindHeadline(ready, readiness.serviceRunning, readiness.resultCopied)
@@ -167,7 +183,7 @@ class MainActivity : AppCompatActivity() {
             },
         )
         sandboxHelper.setTextColor(
-            getColor(if (readiness.resultCopied) R.color.success_mint else R.color.ink_muted),
+            if (readiness.resultCopied) getColor(R.color.success_mint) else themeColor(R.attr.vtInkMuted),
         )
     }
 
@@ -202,9 +218,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun bindPermissionRow(icon: ImageView, status: TextView, action: Button, granted: Boolean) {
         status.setText(if (granted) R.string.perm_ready else R.string.perm_missing)
-        status.setTextColor(getColor(if (granted) R.color.success_mint else R.color.warning_amber_text))
+        status.setTextColor(if (granted) getColor(R.color.success_mint) else themeColor(R.attr.vtWarningText))
         icon.imageTintList = android.content.res.ColorStateList.valueOf(
-            getColor(if (granted) R.color.ink else R.color.warning_amber),
+            if (granted) themeColor(R.attr.vtInk) else themeColor(R.attr.vtWarning),
         )
         action.visibility = if (granted) View.GONE else View.VISIBLE
     }
@@ -217,27 +233,27 @@ class MainActivity : AppCompatActivity() {
             !ready -> {
                 headline = R.string.state_setup_required
                 icon = R.drawable.ic_warning
-                tint = R.color.warning_amber
+                tint = themeColor(R.attr.vtWarning)
             }
             copied -> {
                 headline = R.string.rail_copied
                 icon = R.drawable.ic_check
-                tint = R.color.success_mint
+                tint = getColor(R.color.success_mint)
             }
             running -> {
                 headline = R.string.state_active
                 icon = R.drawable.ic_mic
-                tint = R.color.signal_blue
+                tint = themeColor(R.attr.vtAccent)
             }
             else -> {
                 headline = R.string.state_ready
                 icon = R.drawable.ic_check
-                tint = R.color.success_mint
+                tint = getColor(R.color.success_mint)
             }
         }
         readinessHeadline.setText(headline)
         readinessIcon.setImageResource(icon)
-        readinessIcon.imageTintList = android.content.res.ColorStateList.valueOf(getColor(tint))
+        readinessIcon.imageTintList = android.content.res.ColorStateList.valueOf(tint)
     }
 
     private fun bindPrimaryAction(micGranted: Boolean, overlayGranted: Boolean, running: Boolean) {

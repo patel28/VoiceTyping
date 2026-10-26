@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--
+      Theme.VoiceTyping holds everything the three themes share and reads its colours from the
+      vt* attributes. Each named theme below only binds those attributes, so adding a fourth
+      theme means one more style, not another pass over the layouts.
+    -->
     <style name="Theme.VoiceTyping" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/signal_blue</item>
-        <item name="colorOnPrimary">@color/on_accent</item>
+        <item name="colorPrimary">?attr/vtAccent</item>
+        <item name="colorOnPrimary">?attr/vtOnAccent</item>
         <item name="colorSecondary">@color/success_mint</item>
-        <item name="colorOnSecondary">@color/on_accent</item>
+        <item name="colorOnSecondary">?attr/vtOnAccent</item>
         <item name="colorError">@color/recording_coral</item>
-        <item name="android:colorAccent">@color/signal_blue</item>
-        <item name="android:colorBackground">@color/canvas</item>
-        <item name="android:windowBackground">@color/canvas</item>
-        <item name="android:textColorPrimary">@color/ink</item>
-        <item name="android:textColorSecondary">@color/ink_muted</item>
-        <item name="android:textColorHint">@color/ink_muted</item>
+        <item name="android:colorAccent">?attr/vtAccent</item>
+        <item name="android:textColorPrimary">?attr/vtInk</item>
+        <item name="android:textColorSecondary">?attr/vtInkMuted</item>
+        <item name="android:textColorHint">?attr/vtInkMuted</item>
         <item name="android:fontFamily">sans-serif</item>
         <!-- Edge-to-edge: the activities apply the real insets as padding. -->
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -20,5 +23,50 @@
         <item name="android:enforceNavigationBarContrast">false</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar">true</item>
+    </style>
+
+    <style name="Theme.VoiceTyping.Amber">
+        <item name="vtCanvas">@color/amber_canvas</item>
+        <item name="vtSurface">@color/amber_surface</item>
+        <item name="vtInk">@color/amber_ink</item>
+        <item name="vtInkMuted">@color/amber_ink_muted</item>
+        <item name="vtHairline">@color/amber_hairline</item>
+        <item name="vtAccent">@color/amber_accent</item>
+        <item name="vtAccentWash">@color/amber_accent_wash</item>
+        <item name="vtWarning">@color/amber_warning</item>
+        <item name="vtWarningText">@color/amber_warning_text</item>
+        <item name="vtOnAccent">@color/amber_on_accent</item>
+        <item name="android:colorBackground">@color/amber_canvas</item>
+        <item name="android:windowBackground">@color/amber_canvas</item>
+    </style>
+
+    <style name="Theme.VoiceTyping.Lagoon">
+        <item name="vtCanvas">@color/lagoon_canvas</item>
+        <item name="vtSurface">@color/lagoon_surface</item>
+        <item name="vtInk">@color/lagoon_ink</item>
+        <item name="vtInkMuted">@color/lagoon_ink_muted</item>
+        <item name="vtHairline">@color/lagoon_hairline</item>
+        <item name="vtAccent">@color/lagoon_accent</item>
+        <item name="vtAccentWash">@color/lagoon_accent_wash</item>
+        <item name="vtWarning">@color/warning_amber</item>
+        <item name="vtWarningText">@color/warning_amber_text</item>
+        <item name="vtOnAccent">@color/lagoon_on_accent</item>
+        <item name="android:colorBackground">@color/lagoon_canvas</item>
+        <item name="android:windowBackground">@color/lagoon_canvas</item>
+    </style>
+
+    <style name="Theme.VoiceTyping.Signal">
+        <item name="vtCanvas">@color/signal_canvas</item>
+        <item name="vtSurface">@color/signal_surface</item>
+        <item name="vtInk">@color/signal_ink</item>
+        <item name="vtInkMuted">@color/signal_ink_muted</item>
+        <item name="vtHairline">@color/signal_hairline</item>
+        <item name="vtAccent">@color/signal_accent</item>
+        <item name="vtAccentWash">@color/signal_accent_wash</item>
+        <item name="vtWarning">@color/warning_amber</item>
+        <item name="vtWarningText">@color/warning_amber_text</item>
+        <item name="vtOnAccent">@color/signal_on_accent</item>
+        <item name="android:colorBackground">@color/signal_canvas</item>
+        <item name="android:windowBackground">@color/signal_canvas</item>
     </style>
 </resources>
