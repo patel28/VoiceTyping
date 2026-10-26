@@ -8,6 +8,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.ClipData
+import android.content.ClipDescription
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -21,6 +22,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.os.PersistableBundle
 import android.os.SystemClock
 import android.provider.Settings
 import android.speech.RecognitionListener
@@ -638,7 +640,7 @@ class OverlayBubbleService : Service() {
         }
         val copied = runCatching {
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            clipboard.setPrimaryClip(ClipData.newPlainText("VoiceTyping", copiedText))
+            clipboard.setPrimaryClip(sensitiveClip(copiedText))
             ClipboardStateStore.markCopied(copiedText)
         }.isSuccess
         waitingForFinal = false
@@ -650,6 +652,14 @@ class OverlayBubbleService : Service() {
         else if (copied) showToast(R.string.toast_copied_raw)
         else showToast(R.string.error_copy_failed)
     }
+
+    /** Marks the clip sensitive so Android 13+ hides the dictated text in its clipboard preview. */
+    private fun sensitiveClip(text: String): ClipData =
+        ClipData.newPlainText("VoiceTyping", text).apply {
+            description.extras = PersistableBundle().apply {
+                putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true)
+            }
+        }
 
     private fun destroyRecognizer() {
         mainHandler.removeCallbacks(finalResultTimeout)

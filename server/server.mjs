@@ -4,6 +4,8 @@
 // Endpoints: GET /health, POST /v1/refine -> OpenAI POST https://api.openai.com/v1/responses
 // Retries 429/5xx/network with increasing non-blocking delay (3 total attempts minimum).
 // Request-size limit enforced. Never logs secrets or transcript text (lengths/status only).
+// No CORS headers: the client is an Android app, not a browser. Allowing any origin would let
+// any page open in a browser on this machine reach loopback and spend the configured key.
 
 import http from "node:http";
 import fs from "node:fs";
@@ -219,16 +221,6 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if (method === "OPTIONS" && urlPath === "/v1/refine") {
-    res.writeHead(204, {
-      "access-control-allow-origin": "*",
-      "access-control-allow-methods": "POST, OPTIONS",
-      "access-control-allow-headers": "content-type",
-    });
-    res.end();
-    return;
-  }
-
   if (method === "POST" && urlPath === "/v1/refine") {
     let rawBody = "";
     try {
@@ -283,11 +275,7 @@ const server = http.createServer(async (req, res) => {
         console.log(`POST /v1/refine -> 502 bad upstream outLen=${outLen} inLen=${inLen}`);
         return;
       }
-      res.writeHead(200, {
-        "content-type": "application/json; charset=utf-8",
-        "access-control-allow-origin": "*",
-      });
-      res.end(JSON.stringify({ text: result.text.trim() }));
+      sendJson(res, 200, { text: result.text.trim() });
       console.log(`POST /v1/refine -> 200 inLen=${inLen} outLen=${outLen}`);
       return;
     }
