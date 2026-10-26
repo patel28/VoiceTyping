@@ -681,11 +681,16 @@ class OverlayBubbleService : Service() {
         else showToast(R.string.error_copy_failed)
     }
 
-    /** Marks the clip sensitive so Android 13+ hides the dictated text in its clipboard preview. */
+    /**
+     * Marks the clip sensitive so Android 13+ hides the dictated text in its clipboard preview.
+     * Earlier releases draw no preview at all, so there is nothing to hide there.
+     */
     private fun sensitiveClip(text: String): ClipData =
         ClipData.newPlainText("VoiceTyping", text).apply {
-            description.extras = PersistableBundle().apply {
-                putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true)
+            if (Build.VERSION.SDK_INT >= 33) {
+                description.extras = PersistableBundle().apply {
+                    putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true)
+                }
             }
         }
 

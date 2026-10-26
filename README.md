@@ -1,6 +1,6 @@
 # VoiceTyping
 
-Android 13+ voice typing companion for professionals:
+Android 11+ voice typing companion for professionals:
 
 `floating control → native speech recognition → optional GPT-5.4 cleanup → clipboard → Paste`
 
@@ -21,6 +21,12 @@ The overlay and drag guide are non-focusable; VoiceTyping never opens a keyboard
 - **Offline-safe fallback:** If refinement is unavailable, the raw Android transcript is still copied.
 
 Direct mobile API keys can be extracted from a compromised device. Personal-key mode is for owner-operated testing; a production multi-user release should use an authenticated HTTPS backend.
+
+## Android versions
+
+Runs on Android 11 (API 30) and newer. Two things only take effect on later releases: the
+clipboard is marked sensitive, so the dictated text stays out of the paste preview, from
+Android 13; and the special-use foreground-service type is declared from Android 14.
 
 ## Permissions
 
