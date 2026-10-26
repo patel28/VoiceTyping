@@ -6,3 +6,4 @@ local.properties
 **/build/
 *.iml
 server/.env.local
+sources/
