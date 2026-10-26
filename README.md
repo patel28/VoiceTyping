@@ -40,3 +40,13 @@ Use JDK 17 and Android SDK 35:
 APK: `app/build/outputs/apk/debug/app-debug.apk`
 
 Earlier IME and modal-recorder prototypes remain under `archive/` and are outside active source sets.
+
+## Contributing
+
+Pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) first — it covers the setup, the commit convention, and the few things that will not be merged. CI runs `testDebugUnitTest lintDebug assembleDebug` on every pull request.
+
+## Licence
+
+Licensed under the Apache License 2.0. See [LICENSE](LICENSE).
+
+Copyright 2026 Ganesh Patel.
