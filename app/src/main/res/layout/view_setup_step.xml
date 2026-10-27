@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  One checklist row, inflated once per requirement. The rows are built in code rather than
+  written out four times here, because which ones apply depends on the phone. A finished row
+  collapses to its header, so the list visibly shrinks as the user works down it.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_surface_raised"
+    android:orientation="vertical"
+    android:padding="@dimen/space_4">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:id="@+id/setup_step_chip"
+            android:layout_width="@dimen/icon_chip"
+            android:layout_height="@dimen/icon_chip"
+            android:background="@drawable/bg_icon_chip"
+            android:importantForAccessibility="no">
+
+            <ImageView
+                android:id="@+id/setup_step_icon"
+                android:layout_width="@dimen/icon_chip_glyph"
+                android:layout_height="@dimen/icon_chip_glyph"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_mic" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_3"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/setup_step_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue" />
+
+            <TextView
+                android:id="@+id/setup_step_state"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textAppearance="@style/TextAppearance.VoiceTyping.Caption" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/setup_step_check"
+            android:layout_width="@dimen/icon_row"
+            android:layout_height="@dimen/icon_row"
+            android:layout_marginStart="@dimen/space_2"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_check"
+            android:visibility="gone"
+            app:tint="@color/success_mint" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/setup_step_why"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_3"
+        android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
+        android:textColor="?attr/vtInk" />
+
+    <LinearLayout
+        android:id="@+id/setup_step_actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_3"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/setup_step_action"
+            style="@style/Widget.VoiceTyping.Button.Tonal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/action_open" />
+
+        <Button
+            android:id="@+id/setup_step_confirm"
+            style="@style/Widget.VoiceTyping.Button.Inline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_2"
+            android:text="@string/action_confirm"
+            android:visibility="gone" />
+    </LinearLayout>
+</LinearLayout>

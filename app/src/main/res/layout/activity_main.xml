@@ -6,44 +6,30 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!-- App bar: wordmark, trust line, settings. Insets are applied as padding in MainActivity. -->
+    <!-- App bar: wordmark and settings. Insets are applied as padding in MainActivity. -->
     <LinearLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:baselineAligned="false"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="@dimen/gutter"
-        android:paddingTop="@dimen/space_4"
+        android:paddingTop="@dimen/space_3"
         android:paddingEnd="@dimen/space_2"
         android:paddingBottom="@dimen/space_3">
 
-        <LinearLayout
+        <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
             android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/app_name"
-                android:textAppearance="@style/TextAppearance.VoiceTyping.Wordmark" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="2dp"
-                android:text="@string/main_trust_line"
-                android:textAppearance="@style/TextAppearance.VoiceTyping.Trustline" />
-        </LinearLayout>
+            android:text="@string/app_name"
+            android:textAppearance="@style/TextAppearance.VoiceTyping.Wordmark" />
 
         <ImageButton
             android:id="@+id/open_settings"
             android:layout_width="@dimen/touch_min"
             android:layout_height="@dimen/touch_min"
-            android:layout_gravity="center_vertical"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/action_settings"
             android:src="@drawable/ic_settings"
@@ -58,166 +44,66 @@
         android:clipToPadding="false"
         android:paddingStart="@dimen/gutter"
         android:paddingEnd="@dimen/gutter"
-        android:paddingBottom="@dimen/space_6">
+        android:paddingBottom="@dimen/space_8">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Readiness instrument -->
+            <!-- Hero. One badge, one headline, one line of help, one action. Whatever the app is
+                 doing right now is the largest thing on the screen. -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_surface_raised"
+                android:gravity="center_horizontal"
                 android:orientation="vertical"
-                android:paddingStart="@dimen/space_4"
-                android:paddingTop="@dimen/space_4"
-                android:paddingEnd="@dimen/space_4"
-                android:paddingBottom="@dimen/space_4">
+                android:paddingStart="@dimen/space_5"
+                android:paddingTop="@dimen/space_6"
+                android:paddingEnd="@dimen/space_5"
+                android:paddingBottom="@dimen/space_5">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                <FrameLayout
+                    android:id="@+id/status_badge"
+                    android:layout_width="@dimen/badge_status"
+                    android:layout_height="@dimen/badge_status"
+                    android:background="@drawable/bg_status_badge"
+                    android:importantForAccessibility="no">
 
                     <ImageView
                         android:id="@+id/readiness_icon"
-                        android:layout_width="@dimen/icon_row"
-                        android:layout_height="@dimen/icon_row"
-                        android:layout_gravity="center_vertical"
+                        android:layout_width="@dimen/icon_hero"
+                        android:layout_height="@dimen/icon_hero"
+                        android:layout_gravity="center"
                         android:importantForAccessibility="no"
-                        android:src="@drawable/ic_warning"
-                        app:tint="?attr/vtWarning" />
+                        android:src="@drawable/ic_mic" />
+                </FrameLayout>
 
-                    <TextView
-                        android:id="@+id/readiness_headline"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginStart="@dimen/space_2"
-                        android:layout_weight="1"
-                        android:text="@string/state_setup_required"
-                        android:textAppearance="@style/TextAppearance.VoiceTyping.SectionLabel"
-                        android:textColor="?attr/vtInk" />
-                </LinearLayout>
-
-                <com.voicetyping.directtest.SignalRailView
-                    android:id="@+id/signal_rail"
+                <TextView
+                    android:id="@+id/readiness_headline"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_3"
-                    android:layout_marginBottom="@dimen/space_2" />
+                    android:layout_marginTop="@dimen/space_4"
+                    android:gravity="center"
+                    android:text="@string/state_setup_required"
+                    android:textAppearance="@style/TextAppearance.VoiceTyping.Headline" />
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/hairline"
-                    android:layout_marginBottom="@dimen/space_1"
-                    android:background="?attr/vtHairline" />
-
-                <!-- Microphone permission -->
-                <LinearLayout
+                <TextView
+                    android:id="@+id/readiness_detail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:baselineAligned="false"
-                    android:minHeight="@dimen/touch_min"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:id="@+id/mic_icon"
-                        android:layout_width="@dimen/icon_row"
-                        android:layout_height="@dimen/icon_row"
-                        android:layout_gravity="center_vertical"
-                        android:importantForAccessibility="no"
-                        android:src="@drawable/ic_mic"
-                        app:tint="?attr/vtInkMuted" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginStart="@dimen/space_3"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/perm_mic_title"
-                            android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue" />
-
-                        <TextView
-                            android:id="@+id/mic_status"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/perm_missing"
-                            android:textAppearance="@style/TextAppearance.VoiceTyping.Caption" />
-                    </LinearLayout>
-
-                    <Button
-                        android:id="@+id/mic_action"
-                        style="@style/Widget.VoiceTyping.Button.Inline"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:text="@string/action_allow" />
-                </LinearLayout>
-
-                <!-- Overlay permission -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:baselineAligned="false"
-                    android:minHeight="@dimen/touch_min"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:id="@+id/overlay_icon"
-                        android:layout_width="@dimen/icon_row"
-                        android:layout_height="@dimen/icon_row"
-                        android:layout_gravity="center_vertical"
-                        android:importantForAccessibility="no"
-                        android:src="@drawable/ic_overlay"
-                        app:tint="?attr/vtInkMuted" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginStart="@dimen/space_3"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/perm_overlay_title"
-                            android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue" />
-
-                        <TextView
-                            android:id="@+id/overlay_status"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/perm_missing"
-                            android:textAppearance="@style/TextAppearance.VoiceTyping.Caption" />
-                    </LinearLayout>
-
-                    <Button
-                        android:id="@+id/overlay_action"
-                        style="@style/Widget.VoiceTyping.Button.Inline"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:text="@string/action_allow" />
-                </LinearLayout>
+                    android:layout_marginTop="@dimen/space_2"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.VoiceTyping.Caption" />
 
                 <Button
                     android:id="@+id/primary_action"
                     style="@style/Widget.VoiceTyping.Button.Primary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_3"
-                    android:text="@string/action_allow_mic" />
+                    android:layout_marginTop="@dimen/space_5"
+                    android:text="@string/action_set_up_and_start" />
 
                 <Button
                     android:id="@+id/stop_action"
@@ -227,318 +113,321 @@
                     android:layout_marginTop="@dimen/space_2"
                     android:text="@string/action_stop_bubble"
                     android:visibility="gone" />
+            </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/api_key_missing_warning"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_2"
-                    android:background="@drawable/bg_wash_pill"
-                    android:clickable="true"
-                    android:contentDescription="@string/api_key_missing_warning_a11y"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground"
-                    android:gravity="center_vertical"
-                    android:minHeight="@dimen/touch_min"
-                    android:orientation="horizontal"
-                    android:paddingStart="@dimen/space_3"
-                    android:paddingTop="@dimen/space_2"
-                    android:paddingEnd="@dimen/space_2"
-                    android:paddingBottom="@dimen/space_2">
+            <!-- Anything the user still has to deal with. Each card is one tap to the screen that
+                 fixes it, and both are gone once there is nothing to say. -->
+            <LinearLayout
+                android:id="@+id/setup_card"
+                style="@style/Widget.VoiceTyping.Card.Clickable"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_3">
 
-                    <ImageView
-                        android:layout_width="@dimen/icon_row"
-                        android:layout_height="@dimen/icon_row"
-                        android:contentDescription="@null"
-                        android:importantForAccessibility="no"
-                        android:src="@drawable/ic_warning"
-                        app:tint="?attr/vtWarning" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/space_2"
-                        android:layout_weight="1"
-                        android:importantForAccessibility="no"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/api_key_missing_warning_title"
-                            android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue"
-                            android:textColor="?attr/vtWarningText" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="@string/api_key_missing_warning_body"
-                            android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
-                            android:textColor="?attr/vtInk" />
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="@dimen/touch_min"
-                        android:gravity="center"
-                        android:importantForAccessibility="no"
-                        android:paddingStart="@dimen/space_2"
-                        android:paddingEnd="@dimen/space_1"
-                        android:text="@string/action_open_settings"
-                        android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue"
-                        android:textColor="?attr/vtAccent" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/background_restricted_warning"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_2"
-                    android:background="@drawable/bg_wash_pill"
-                    android:clickable="true"
-                    android:contentDescription="@string/background_warning_a11y"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground"
-                    android:gravity="center_vertical"
-                    android:minHeight="@dimen/touch_min"
-                    android:orientation="horizontal"
-                    android:paddingStart="@dimen/space_3"
-                    android:paddingTop="@dimen/space_2"
-                    android:paddingEnd="@dimen/space_2"
-                    android:paddingBottom="@dimen/space_2">
+                <FrameLayout
+                    android:id="@+id/setup_card_chip"
+                    android:layout_width="@dimen/icon_chip"
+                    android:layout_height="@dimen/icon_chip"
+                    android:background="@drawable/bg_icon_chip"
+                    android:importantForAccessibility="no">
 
                     <ImageView
-                        android:layout_width="@dimen/icon_row"
-                        android:layout_height="@dimen/icon_row"
-                        android:contentDescription="@null"
+                        android:id="@+id/setup_card_icon"
+                        android:layout_width="@dimen/icon_chip_glyph"
+                        android:layout_height="@dimen/icon_chip_glyph"
+                        android:layout_gravity="center"
                         android:importantForAccessibility="no"
-                        android:src="@drawable/ic_warning"
-                        app:tint="?attr/vtWarning" />
+                        android:src="@drawable/ic_warning" />
+                </FrameLayout>
 
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/space_2"
-                        android:layout_weight="1"
-                        android:importantForAccessibility="no"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/background_warning_title"
-                            android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue"
-                            android:textColor="?attr/vtWarningText" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="@string/background_warning_body"
-                            android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
-                            android:textColor="?attr/vtInk" />
-                    </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_3"
+                    android:layout_weight="1"
+                    android:importantForAccessibility="no"
+                    android:orientation="vertical">
 
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="@dimen/touch_min"
-                        android:gravity="center"
-                        android:importantForAccessibility="no"
-                        android:paddingStart="@dimen/space_2"
-                        android:paddingEnd="@dimen/space_1"
-                        android:text="@string/action_open"
-                        android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue"
-                        android:textColor="?attr/vtAccent" />
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/setup_card_title"
+                        android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue" />
+
+                    <TextView
+                        android:id="@+id/setup_card_body"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textAppearance="@style/TextAppearance.VoiceTyping.Caption" />
                 </LinearLayout>
+
+                <TextView
+                    android:id="@+id/setup_card_progress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_2"
+                    android:importantForAccessibility="no"
+                    android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue"
+                    android:textColor="?attr/vtInkMuted" />
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_marginStart="@dimen/space_1"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_chevron_right"
+                    app:tint="?attr/vtInkMuted" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/api_key_missing_warning"
+                style="@style/Widget.VoiceTyping.Card.Clickable"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_2"
+                android:contentDescription="@string/api_key_missing_warning_a11y">
+
+                <FrameLayout
+                    android:layout_width="@dimen/icon_chip"
+                    android:layout_height="@dimen/icon_chip"
+                    android:background="@drawable/bg_icon_chip"
+                    android:importantForAccessibility="no">
+
+                    <ImageView
+                        android:layout_width="@dimen/icon_chip_glyph"
+                        android:layout_height="@dimen/icon_chip_glyph"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_info"
+                        app:tint="?attr/vtAccent" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_3"
+                    android:layout_weight="1"
+                    android:importantForAccessibility="no"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/api_key_missing_warning_title"
+                        android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/api_key_missing_warning_body"
+                        android:textAppearance="@style/TextAppearance.VoiceTyping.Caption" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_marginStart="@dimen/space_2"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_chevron_right"
+                    app:tint="?attr/vtInkMuted" />
+            </LinearLayout>
+
+            <!-- One grouped list for everything that is reference rather than action: what the
+                 gesture is, how the thing is used, and what the app can see. -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_3"
+                android:background="@drawable/bg_surface_raised"
+                android:orientation="vertical"
+                android:paddingTop="@dimen/space_1"
+                android:paddingBottom="@dimen/space_1">
 
                 <LinearLayout
                     android:id="@+id/mode_summary_row"
-                    style="@style/Widget.VoiceTyping.Row"
+                    style="@style/Widget.VoiceTyping.ListRow"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_2"
-                    android:orientation="horizontal">
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/mode_row_title"
+                        android:textAppearance="@style/TextAppearance.VoiceTyping.RowTitle" />
 
                     <TextView
                         android:id="@+id/mode_summary"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/space_2"
                         android:textAppearance="@style/TextAppearance.VoiceTyping.Caption" />
 
                     <ImageView
                         android:layout_width="18dp"
                         android:layout_height="18dp"
-                        android:layout_gravity="center_vertical"
+                        android:layout_marginStart="@dimen/space_1"
                         android:importantForAccessibility="no"
                         android:src="@drawable/ic_chevron_right"
                         app:tint="?attr/vtInkMuted" />
                 </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/hairline"
+                    android:layout_marginStart="@dimen/space_4"
+                    android:background="?attr/vtHairline" />
+
+                <LinearLayout
+                    android:id="@+id/how_row"
+                    style="@style/Widget.VoiceTyping.ListRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/how_it_works_title"
+                        android:textAppearance="@style/TextAppearance.VoiceTyping.RowTitle" />
+
+                    <ImageView
+                        android:id="@+id/how_chevron"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_chevron_down"
+                        app:tint="?attr/vtInkMuted" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/how_body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal"
+                    android:paddingStart="@dimen/space_4"
+                    android:paddingTop="@dimen/space_1"
+                    android:paddingEnd="@dimen/space_4"
+                    android:paddingBottom="@dimen/space_4"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:layout_width="@dimen/icon_step"
+                            android:layout_height="@dimen/icon_step"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_field"
+                            app:tint="?attr/vtInkMuted" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="@dimen/space_2"
+                            android:paddingEnd="@dimen/space_2"
+                            android:text="@string/step_focus"
+                            android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
+                            android:textColor="?attr/vtInk" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:layout_width="@dimen/icon_step"
+                            android:layout_height="@dimen/icon_step"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_mic"
+                            app:tint="?attr/vtAccent" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="@dimen/space_2"
+                            android:paddingEnd="@dimen/space_2"
+                            android:text="@string/step_speak"
+                            android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
+                            android:textColor="?attr/vtInk" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:layout_width="@dimen/icon_step"
+                            android:layout_height="@dimen/icon_step"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_paste"
+                            app:tint="?attr/vtInkMuted" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="@dimen/space_2"
+                            android:text="@string/step_paste"
+                            android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
+                            android:textColor="?attr/vtInk" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/hairline"
+                    android:layout_marginStart="@dimen/space_4"
+                    android:background="?attr/vtHairline" />
+
+                <LinearLayout
+                    android:id="@+id/privacy_row"
+                    style="@style/Widget.VoiceTyping.ListRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/privacy_row_title"
+                        android:textAppearance="@style/TextAppearance.VoiceTyping.RowTitle" />
+
+                    <ImageView
+                        android:id="@+id/privacy_chevron"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_chevron_down"
+                        app:tint="?attr/vtInkMuted" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/privacy_body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="@dimen/space_4"
+                    android:paddingTop="@dimen/space_1"
+                    android:paddingEnd="@dimen/space_4"
+                    android:paddingBottom="@dimen/space_4"
+                    android:text="@string/privacy_body"
+                    android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
+                    android:visibility="gone" />
             </LinearLayout>
 
-            <!-- First-use instruction -->
+            <!-- Somewhere to paste a result without leaving the app. -->
             <TextView
                 style="@style/Widget.VoiceTyping.SectionLabel"
                 android:layout_marginTop="@dimen/space_6"
-                android:layout_marginBottom="@dimen/space_3"
-                android:text="@string/steps_label" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:baselineAligned="false"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="@dimen/icon_step"
-                        android:layout_height="@dimen/icon_step"
-                        android:importantForAccessibility="no"
-                        android:src="@drawable/ic_field"
-                        app:tint="?attr/vtInk" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingTop="@dimen/space_2"
-                        android:text="@string/step_focus"
-                        android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
-                        android:textColor="?attr/vtInk" />
-                </LinearLayout>
-
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_gravity="top"
-                    android:layout_marginTop="4dp"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/ic_chevron_right"
-                    app:tint="?attr/vtInkMuted" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:paddingStart="@dimen/space_2"
-                    android:paddingEnd="0dp">
-
-                    <ImageView
-                        android:layout_width="@dimen/icon_step"
-                        android:layout_height="@dimen/icon_step"
-                        android:importantForAccessibility="no"
-                        android:src="@drawable/ic_mic"
-                        app:tint="?attr/vtAccent" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingTop="@dimen/space_2"
-                        android:text="@string/step_speak"
-                        android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
-                        android:textColor="?attr/vtInk" />
-                </LinearLayout>
-
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_gravity="top"
-                    android:layout_marginTop="4dp"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/ic_chevron_right"
-                    app:tint="?attr/vtInkMuted" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:paddingEnd="0dp"
-                    android:paddingStart="@dimen/space_2">
-
-                    <ImageView
-                        android:layout_width="@dimen/icon_step"
-                        android:layout_height="@dimen/icon_step"
-                        android:importantForAccessibility="no"
-                        android:src="@drawable/ic_paste"
-                        app:tint="?attr/vtInk" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingTop="@dimen/space_2"
-                        android:text="@string/step_paste"
-                        android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
-                        android:textColor="?attr/vtInk" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/step_gesture"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_3"
-                android:background="@drawable/bg_wash_pill"
-                android:paddingStart="@dimen/space_3"
-                android:paddingTop="@dimen/space_2"
-                android:paddingEnd="@dimen/space_3"
-                android:paddingBottom="@dimen/space_2"
-                android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
-                android:textColor="?attr/vtInk" />
-
-            <!-- Privacy disclosure -->
-            <LinearLayout
-                android:id="@+id/privacy_row"
-                style="@style/Widget.VoiceTyping.Row"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_5"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:text="@string/privacy_row_title"
-                    android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue" />
-
-                <ImageView
-                    android:id="@+id/privacy_chevron"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center_vertical"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/ic_chevron_down"
-                    app:tint="?attr/vtInkMuted" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/privacy_body"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingBottom="@dimen/space_2"
-                android:text="@string/privacy_body"
-                android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
-                android:visibility="gone" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/hairline"
-                android:layout_marginTop="@dimen/space_2"
-                android:background="?attr/vtHairline" />
-
-            <!-- Paste sandbox -->
-            <TextView
-                style="@style/Widget.VoiceTyping.SectionLabel"
-                android:layout_marginTop="@dimen/space_5"
                 android:layout_marginBottom="@dimen/space_2"
                 android:text="@string/sandbox_label" />
 
@@ -559,10 +448,7 @@
                 android:id="@+id/sandbox_helper"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingEnd="@dimen/space_1"
-                android:paddingStart="@dimen/space_1"
                 android:paddingTop="@dimen/space_2"
-                android:text="@string/sandbox_helper_idle"
                 android:textAppearance="@style/TextAppearance.VoiceTyping.Caption" />
         </LinearLayout>
     </ScrollView>

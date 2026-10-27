@@ -8,6 +8,14 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <!--
+      Asked for from the setup run, as the one-tap alternative to sending the user into Settings
+      to find this app in a list. The floating mic is a user-started, continuously visible control
+      that has to survive the screen going off, which is the whole point of the app.
+    -->
+    <uses-permission
+        android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
+        tools:ignore="BatteryLife" />
 
     <uses-feature
         android:name="android.hardware.microphone"
@@ -33,6 +41,10 @@
 
         <activity
             android:name=".SettingsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".SetupActivity"
             android:exported="false" />
 
         <activity

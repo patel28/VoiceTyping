@@ -95,7 +95,27 @@ class AppSettingsStore(context: Context) {
     fun readTheme(): AppTheme =
         AppSettingsCodec.decodeTheme(preferences.getString(AppSettingsCodec.KEY_THEME, null))
 
+    /**
+     * No API reads a vendor's autostart list back, so this records that the user said they had
+     * switched it on. Kept out of [AppSettings] on purpose, like [readTheme]: the setup screen
+     * reads it on every resume, and [read] would unlock the Keystore each time.
+     */
+    fun readAutostartConfirmed(): Boolean = preferences.getBoolean(KEY_AUTOSTART_CONFIRMED, false)
+
+    fun writeAutostartConfirmed(confirmed: Boolean) =
+        preferences.edit().putBoolean(KEY_AUTOSTART_CONFIRMED, confirmed).apply()
+
+    /** Same again for the vendor's own battery manager, which Android's exemption does not cover. */
+    fun readBatteryConfirmed(): Boolean = preferences.getBoolean(KEY_BATTERY_CONFIRMED, false)
+
+    fun writeBatteryConfirmed(confirmed: Boolean) =
+        preferences.edit().putBoolean(KEY_BATTERY_CONFIRMED, confirmed).apply()
+
     fun clearApiKey() = apiKeyVault.clear()
 
-    companion object { private const val PREFERENCES_NAME = "voicetyping_settings" }
+    companion object {
+        private const val PREFERENCES_NAME = "voicetyping_settings"
+        private const val KEY_AUTOSTART_CONFIRMED = "autostart_confirmed"
+        private const val KEY_BATTERY_CONFIRMED = "battery_confirmed"
+    }
 }

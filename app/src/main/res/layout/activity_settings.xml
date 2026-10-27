@@ -222,76 +222,49 @@
                 android:layout_marginBottom="@dimen/space_2"
                 android:text="@string/settings_background_label" />
 
+            <!-- The checklist itself lives on SetupActivity, so there is one place that knows
+                 what is set and what is not. -->
             <LinearLayout
+                android:id="@+id/background_setup_row"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/bg_row_selectable"
+                android:clickable="true"
+                android:focusable="true"
                 android:gravity="center_vertical"
                 android:minHeight="@dimen/touch_min"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingStart="@dimen/space_2"
+                android:paddingEnd="@dimen/space_2">
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:importantForAccessibility="no"
                     android:orientation="vertical">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/background_battery_title"
+                        android:text="@string/settings_setup_row"
                         android:textAppearance="@style/TextAppearance.VoiceTyping.Body" />
 
                     <TextView
-                        android:id="@+id/background_battery_status"
+                        android:id="@+id/background_setup_status"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
+                        android:text="@string/settings_setup_row_detail"
                         android:textAppearance="@style/TextAppearance.VoiceTyping.Caption" />
                 </LinearLayout>
 
-                <Button
-                    android:id="@+id/background_battery_action"
-                    style="@style/Widget.VoiceTyping.Button.Inline"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/action_open" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/background_autostart_row"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_2"
-                android:gravity="center_vertical"
-                android:minHeight="@dimen/touch_min"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/background_autostart_title"
-                        android:textAppearance="@style/TextAppearance.VoiceTyping.Body" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="@string/background_autostart_body"
-                        android:textAppearance="@style/TextAppearance.VoiceTyping.Caption" />
-                </LinearLayout>
-
-                <Button
-                    android:id="@+id/background_autostart_action"
-                    style="@style/Widget.VoiceTyping.Button.Inline"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/action_open" />
+                <ImageView
+                    android:layout_width="@dimen/icon_row"
+                    android:layout_height="@dimen/icon_row"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_chevron_right"
+                    app:tint="?attr/vtInkMuted" />
             </LinearLayout>
 
             <View

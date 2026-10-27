@@ -838,7 +838,20 @@ class OverlayBubbleService : Service() {
     companion object {
         @Volatile
         var isRunning: Boolean = false
-            private set
+            private set(value) {
+                field = value
+                // Set on the main thread in onCreate and onDestroy, so the screen watching it
+                // hears about the change on the thread it renders on.
+                onRunningChanged?.invoke(value)
+            }
+
+        /**
+         * Set by whichever screen is showing the mic's state. The service starts a moment after
+         * startForegroundService returns, so a screen that only read [isRunning] on the way out
+         * would go on claiming the mic is off while the bubble is already on top of it.
+         */
+        @Volatile
+        var onRunningChanged: ((Boolean) -> Unit)? = null
 
         const val ACTION_START = "com.voicetyping.directtest.action.START_BUBBLE"
         const val ACTION_STOP = "com.voicetyping.directtest.action.STOP_BUBBLE"
