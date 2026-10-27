@@ -12,7 +12,12 @@
     <dimen name="hairline">1dp</dimen>
     <dimen name="radius_surface">14dp</dimen>
     <dimen name="radius_field">10dp</dimen>
+    <dimen name="radius_chip">12dp</dimen>
     <dimen name="bubble_glyph">26dp</dimen>
     <dimen name="icon_row">22dp</dimen>
     <dimen name="icon_step">24dp</dimen>
+    <dimen name="badge_status">72dp</dimen>
+    <dimen name="icon_hero">30dp</dimen>
+    <dimen name="icon_chip">40dp</dimen>
+    <dimen name="icon_chip_glyph">20dp</dimen>
 </resources>

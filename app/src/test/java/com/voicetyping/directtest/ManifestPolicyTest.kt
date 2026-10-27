@@ -18,6 +18,10 @@ class ManifestPolicyTest {
             "android.permission.FOREGROUND_SERVICE",
             "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
             "android.permission.FOREGROUND_SERVICE_MICROPHONE",
+            // Deliberate: the setup run asks for the battery exemption in one dialog rather than
+            // sending the user to find this app in a Settings list. Google Play reviews this one,
+            // so it stays on the approved list only as long as that is still the reason for it.
+            "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
         )
         assertEquals(approved, declared)
         assertFalse(manifest.contains("AccessibilityService"))

@@ -11,6 +11,8 @@ class SetupChecklistTest {
         micGranted = false,
         overlayGranted = false,
         batteryExempt = false,
+        batteryNeedsConfirmation = false,
+        batteryConfirmed = false,
         hasVendorAutostart = true,
         autostartConfirmed = false,
     )
@@ -66,6 +68,8 @@ class SetupChecklistTest {
             micGranted = true,
             overlayGranted = true,
             batteryExempt = true,
+            batteryNeedsConfirmation = false,
+            batteryConfirmed = false,
             hasVendorAutostart = false,
             autostartConfirmed = false,
         )
@@ -93,5 +97,36 @@ class SetupChecklistTest {
         assertEquals(RequirementState.DONE, SetupChecklist.state(SetupRequirement.MICROPHONE, done))
         assertEquals(RequirementState.DONE, SetupChecklist.state(SetupRequirement.OVERLAY, done))
         assertEquals(RequirementState.DONE, SetupChecklist.state(SetupRequirement.BATTERY, done))
+    }
+
+    /**
+     * The bug this guards: a phone can report itself exempt from Android's battery optimisation
+     * while the vendor's own battery manager still stops the service, so the row must not claim
+     * the step is done on the strength of the half it can read.
+     */
+    @Test fun batteryIsNotDoneOnTheAndroidExemptionAloneWhereTheVendorRunsItsOwn() {
+        val androidExemptOnly = nothingDone.copy(
+            batteryExempt = true,
+            batteryNeedsConfirmation = true,
+        )
+        assertEquals(
+            RequirementState.UNCONFIRMED,
+            SetupChecklist.state(SetupRequirement.BATTERY, androidExemptOnly),
+        )
+        assertTrue(SetupChecklist.outstanding(androidExemptOnly).contains(SetupRequirement.BATTERY))
+
+        val confirmed = androidExemptOnly.copy(batteryConfirmed = true)
+        assertEquals(
+            RequirementState.CONFIRMED_BY_USER,
+            SetupChecklist.state(SetupRequirement.BATTERY, confirmed),
+        )
+    }
+
+    @Test fun batteryStillReadsAsMissingUntilAndroidItselfIsSatisfied() {
+        val vendorPhone = nothingDone.copy(batteryNeedsConfirmation = true, batteryConfirmed = true)
+        assertEquals(
+            RequirementState.MISSING,
+            SetupChecklist.state(SetupRequirement.BATTERY, vendorPhone),
+        )
     }
 }

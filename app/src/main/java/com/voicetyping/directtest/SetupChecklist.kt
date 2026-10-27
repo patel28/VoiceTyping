@@ -1,5 +1,10 @@
 package com.voicetyping.directtest
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.provider.Settings
+
 /**
  * The four switches the floating mic depends on. Microphone and overlay stop it from starting at
  * all; unrestricted battery use and the vendor autostart list decide whether it is still alive an
@@ -8,9 +13,10 @@ package com.voicetyping.directtest
 enum class SetupRequirement { MICROPHONE, OVERLAY, BATTERY, AUTOSTART }
 
 /**
- * Autostart is the odd one out: no API reads a vendor's own list back, so the screen can only ask
- * the user and remember the answer. Keeping that in its own state stops the checklist from
- * claiming a switch it never saw.
+ * Some switches cannot be read back at all: no API reports a vendor's autostart list, and on
+ * skins with their own battery manager the Android exemption says nothing about the vendor's own
+ * setting. For those the screen can only ask the user and remember the answer, and keeping that
+ * in its own state stops the checklist from claiming a switch it never saw.
  */
 enum class RequirementState { DONE, MISSING, CONFIRMED_BY_USER, UNCONFIRMED }
 
@@ -19,6 +25,8 @@ data class SetupStatus(
     val micGranted: Boolean,
     val overlayGranted: Boolean,
     val batteryExempt: Boolean,
+    val batteryNeedsConfirmation: Boolean,
+    val batteryConfirmed: Boolean,
     val hasVendorAutostart: Boolean,
     val autostartConfirmed: Boolean,
 )
@@ -33,7 +41,14 @@ object SetupChecklist {
         when (requirement) {
             SetupRequirement.MICROPHONE -> done(status.micGranted)
             SetupRequirement.OVERLAY -> done(status.overlayGranted)
-            SetupRequirement.BATTERY -> done(status.batteryExempt)
+            // On a skin with its own battery manager, the Android exemption is only half of it:
+            // the vendor's own setting decides the rest and cannot be read, so the user confirms.
+            SetupRequirement.BATTERY -> when {
+                !status.batteryExempt -> RequirementState.MISSING
+                !status.batteryNeedsConfirmation -> RequirementState.DONE
+                status.batteryConfirmed -> RequirementState.CONFIRMED_BY_USER
+                else -> RequirementState.UNCONFIRMED
+            }
             SetupRequirement.AUTOSTART ->
                 if (status.autostartConfirmed) RequirementState.CONFIRMED_BY_USER else RequirementState.UNCONFIRMED
         }
@@ -58,3 +73,19 @@ object SetupChecklist {
     private fun RequirementState.isOutstanding() =
         this == RequirementState.MISSING || this == RequirementState.UNCONFIRMED
 }
+
+/**
+ * Reads every switch at once, so the home screen, the setup run and Settings cannot show three
+ * different answers. Kept out of [SetupChecklist] itself, which stays free of Android types and
+ * so can be tested off-device.
+ */
+fun readSetupStatus(context: Context, store: AppSettingsStore) = SetupStatus(
+    micGranted = context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) ==
+        PackageManager.PERMISSION_GRANTED,
+    overlayGranted = Settings.canDrawOverlays(context),
+    batteryExempt = BackgroundAccess.isBatteryExempt(context),
+    batteryNeedsConfirmation = BackgroundAccess.batteryNeedsConfirmation(),
+    batteryConfirmed = store.readBatteryConfirmed(),
+    hasVendorAutostart = BackgroundAccess.hasVendorAutostartList(),
+    autostartConfirmed = store.readAutostartConfirmed(),
+)

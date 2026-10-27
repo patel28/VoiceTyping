@@ -150,14 +150,7 @@ class SettingsActivity : AppCompatActivity() {
 
     /** How much of the checklist is left, read on every resume because the setup screen changes it. */
     private fun bindSetupRow() {
-        val status = SetupStatus(
-            micGranted = checkSelfPermission(Manifest.permission.RECORD_AUDIO) ==
-                PackageManager.PERMISSION_GRANTED,
-            overlayGranted = Settings.canDrawOverlays(this),
-            batteryExempt = BackgroundAccess.isBatteryExempt(this),
-            hasVendorAutostart = BackgroundAccess.hasVendorAutostartList(),
-            autostartConfirmed = store.readAutostartConfirmed(),
-        )
+        val status = readSetupStatus(this, store)
         val complete = SetupChecklist.isComplete(status)
         setupStatus.text = if (complete) {
             getString(R.string.settings_setup_row_detail)

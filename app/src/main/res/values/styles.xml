@@ -22,6 +22,19 @@
         <item name="android:textColor">?attr/vtInkMuted</item>
     </style>
 
+    <!-- The one piece of large type on the screen: whatever state the app is actually in. -->
+    <style name="TextAppearance.VoiceTyping.Headline" parent="TextAppearance.MaterialComponents.Headline5">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?attr/vtInk</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="TextAppearance.VoiceTyping.RowTitle" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">?attr/vtInk</item>
+    </style>
+
     <style name="TextAppearance.VoiceTyping.Body" parent="TextAppearance.MaterialComponents.Body1">
         <item name="android:textSize">15sp</item>
         <item name="android:textColor">?attr/vtInk</item>
@@ -77,6 +90,18 @@
         <item name="cornerRadius">@dimen/radius_field</item>
     </style>
 
+    <!-- Row-level action: reads as a button without four filled accent blocks down the screen. -->
+    <style name="Widget.VoiceTyping.Button.Tonal" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:minWidth">88dp</item>
+        <item name="android:minHeight">@dimen/touch_min</item>
+        <item name="android:textColor">?attr/vtAccent</item>
+        <item name="backgroundTint">?attr/vtAccentWash</item>
+        <item name="cornerRadius">@dimen/radius_field</item>
+    </style>
+
     <style name="Widget.VoiceTyping.Button.Inline" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:textSize">14sp</item>
         <item name="android:textAllCaps">false</item>
@@ -97,6 +122,31 @@
         <item name="android:paddingTop">@dimen/space_2</item>
         <item name="android:paddingBottom">@dimen/space_2</item>
         <item name="android:textCursorDrawable">@null</item>
+    </style>
+
+    <!-- A card that is also a tap target: the attention cards and nothing else. -->
+    <style name="Widget.VoiceTyping.Card.Clickable" parent="">
+        <item name="android:background">@drawable/bg_card_selectable</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:paddingStart">@dimen/space_4</item>
+        <item name="android:paddingEnd">@dimen/space_4</item>
+        <item name="android:paddingTop">@dimen/space_3</item>
+        <item name="android:paddingBottom">@dimen/space_3</item>
+    </style>
+
+    <!-- One row of the grouped list under the hero. Dividers are drawn between them. -->
+    <style name="Widget.VoiceTyping.ListRow" parent="">
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:minHeight">@dimen/touch_min</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:paddingStart">@dimen/space_4</item>
+        <item name="android:paddingEnd">@dimen/space_4</item>
     </style>
 
     <!-- Expandable disclosure rows and the mode selector both need a focus-visible tap target. -->

@@ -105,16 +105,17 @@ class AppSettingsStore(context: Context) {
     fun writeAutostartConfirmed(confirmed: Boolean) =
         preferences.edit().putBoolean(KEY_AUTOSTART_CONFIRMED, confirmed).apply()
 
-    /** True once the setup screen has been shown, so it only opens itself on a first run. */
-    fun readSetupSeen(): Boolean = preferences.getBoolean(KEY_SETUP_SEEN, false)
+    /** Same again for the vendor's own battery manager, which Android's exemption does not cover. */
+    fun readBatteryConfirmed(): Boolean = preferences.getBoolean(KEY_BATTERY_CONFIRMED, false)
 
-    fun markSetupSeen() = preferences.edit().putBoolean(KEY_SETUP_SEEN, true).apply()
+    fun writeBatteryConfirmed(confirmed: Boolean) =
+        preferences.edit().putBoolean(KEY_BATTERY_CONFIRMED, confirmed).apply()
 
     fun clearApiKey() = apiKeyVault.clear()
 
     companion object {
         private const val PREFERENCES_NAME = "voicetyping_settings"
         private const val KEY_AUTOSTART_CONFIRMED = "autostart_confirmed"
-        private const val KEY_SETUP_SEEN = "setup_seen"
+        private const val KEY_BATTERY_CONFIRMED = "battery_confirmed"
     }
 }
