@@ -17,16 +17,33 @@
     <string name="rail_a11y_ahead">%1$s, not reached yet</string>
     <string name="rail_a11y_label">Progress rail</string>
 
-    <!-- Permission rows -->
-    <string name="perm_mic_title">Microphone</string>
-    <string name="perm_overlay_title">Display over other apps</string>
-    <string name="perm_ready">Ready</string>
-    <string name="perm_missing">Permission needed</string>
-    <string name="action_allow">Allow</string>
+    <!-- Setup checklist -->
+    <string name="setup_title">Floating mic setup</string>
+    <string name="setup_subtitle">These switches decide whether the floating mic starts, and whether it is still there an hour later.</string>
+    <string name="setup_progress">%1$d of %2$d done</string>
+    <string name="setup_card_title">Finish setup</string>
+    <string name="setup_card_body">Still to do: %1$s</string>
+    <string name="setup_card_a11y">%1$s. %2$s. Opens the setup screen.</string>
+    <string name="setup_mic_title">Microphone</string>
+    <string name="setup_mic_why">Needed to record anything at all.</string>
+    <string name="setup_overlay_title">Display over other apps</string>
+    <string name="setup_overlay_why">The floating mic is drawn over the app you are typing in.</string>
+    <string name="setup_battery_title">Unrestricted battery use</string>
+    <string name="setup_battery_why">Android stops restricted apps once the screen has been off for a while. Set VoiceTyping to unrestricted on the screen that opens.</string>
+    <string name="setup_autostart_title">Autostart</string>
+    <string name="setup_autostart_why">%1$s phones stop apps that are not on the autostart list, even with a notification showing. Switch VoiceTyping on there, then confirm it here.</string>
+    <string name="setup_state_done">Done</string>
+    <string name="setup_state_missing">Not set</string>
+    <string name="setup_state_confirmed">Confirmed by you</string>
+    <string name="setup_state_unconfirmed">Cannot be read from inside the app</string>
+    <string name="setup_complete_note">All set. The floating mic can start, and nothing here should stop it later.</string>
+    <string name="setup_row_a11y">%1$s, %2$s</string>
+    <string name="action_confirm">I switched it on</string>
+    <string name="action_not_switched_on">Not switched on</string>
+    <string name="action_finish_setup">Finish setup</string>
+    <string name="action_done">Done</string>
 
     <!-- Primary and secondary actions -->
-    <string name="action_allow_mic">Allow microphone</string>
-    <string name="action_allow_overlay">Allow display over other apps</string>
     <string name="action_start_bubble">Start floating mic</string>
     <string name="action_stop_bubble">Stop floating mic</string>
     <string name="action_settings">Settings</string>
@@ -39,15 +56,9 @@
     <string name="api_key_missing_warning_a11y">Refinement is not configured. No API key is saved. If the local development service is unavailable, raw transcript is copied without grammar, sentence-completion, or contextual refinement. Open Settings.</string>
 
     <!-- Background survival -->
-    <string name="background_warning_title">The floating mic may be stopped</string>
-    <string name="background_warning_body">Battery optimisation is on for VoiceTyping. Android can stop the floating mic while the screen is off. Open the list and set VoiceTyping to unrestricted.</string>
-    <string name="background_warning_a11y">The floating mic may be stopped. Battery optimisation is on for VoiceTyping. Android can stop the floating mic while the screen is off. Open the list and set VoiceTyping to unrestricted. Open the battery optimisation list and set VoiceTyping to unrestricted.</string>
     <string name="settings_background_label">Keep running in the background</string>
-    <string name="background_battery_title">Battery optimisation</string>
-    <string name="background_battery_exempt">Allowed</string>
-    <string name="background_battery_restricted">Restricted</string>
-    <string name="background_autostart_title">Autostart</string>
-    <string name="background_autostart_body">Xiaomi, Redmi and POCO phones stop apps that are not on the autostart list, even with a notification showing. Turn VoiceTyping on there as well.</string>
+    <string name="settings_setup_row">Floating mic setup</string>
+    <string name="settings_setup_row_detail">Permissions, battery and autostart.</string>
     <string name="action_open">Open</string>
 
     <!-- Recording mode summary -->

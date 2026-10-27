@@ -115,100 +115,68 @@
                     android:layout_marginBottom="@dimen/space_1"
                     android:background="?attr/vtHairline" />
 
-                <!-- Microphone permission -->
+                <!-- Setup checklist summary. The rows themselves live on SetupActivity; the
+                     home screen only says how much is left and opens it. -->
                 <LinearLayout
+                    android:id="@+id/setup_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/bg_wash_pill"
                     android:baselineAligned="false"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:gravity="center_vertical"
                     android:minHeight="@dimen/touch_min"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:paddingStart="@dimen/space_3"
+                    android:paddingTop="@dimen/space_2"
+                    android:paddingEnd="@dimen/space_2"
+                    android:paddingBottom="@dimen/space_2">
 
                     <ImageView
-                        android:id="@+id/mic_icon"
+                        android:id="@+id/setup_card_icon"
                         android:layout_width="@dimen/icon_row"
                         android:layout_height="@dimen/icon_row"
-                        android:layout_gravity="center_vertical"
                         android:importantForAccessibility="no"
-                        android:src="@drawable/ic_mic"
-                        app:tint="?attr/vtInkMuted" />
+                        android:src="@drawable/ic_warning"
+                        app:tint="?attr/vtWarning" />
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginStart="@dimen/space_3"
+                        android:layout_marginStart="@dimen/space_2"
                         android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/perm_mic_title"
-                            android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue" />
-
-                        <TextView
-                            android:id="@+id/mic_status"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/perm_missing"
-                            android:textAppearance="@style/TextAppearance.VoiceTyping.Caption" />
-                    </LinearLayout>
-
-                    <Button
-                        android:id="@+id/mic_action"
-                        style="@style/Widget.VoiceTyping.Button.Inline"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:text="@string/action_allow" />
-                </LinearLayout>
-
-                <!-- Overlay permission -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:baselineAligned="false"
-                    android:minHeight="@dimen/touch_min"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:id="@+id/overlay_icon"
-                        android:layout_width="@dimen/icon_row"
-                        android:layout_height="@dimen/icon_row"
-                        android:layout_gravity="center_vertical"
                         android:importantForAccessibility="no"
-                        android:src="@drawable/ic_overlay"
-                        app:tint="?attr/vtInkMuted" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginStart="@dimen/space_3"
-                        android:layout_weight="1"
                         android:orientation="vertical">
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:id="@+id/setup_card_title"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/perm_overlay_title"
-                            android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue" />
+                            android:text="@string/setup_card_title"
+                            android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue"
+                            android:textColor="?attr/vtWarningText" />
 
                         <TextView
-                            android:id="@+id/overlay_status"
-                            android:layout_width="wrap_content"
+                            android:id="@+id/setup_card_body"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/perm_missing"
-                            android:textAppearance="@style/TextAppearance.VoiceTyping.Caption" />
+                            android:layout_marginTop="2dp"
+                            android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
+                            android:textColor="?attr/vtInk" />
                     </LinearLayout>
 
-                    <Button
-                        android:id="@+id/overlay_action"
-                        style="@style/Widget.VoiceTyping.Button.Inline"
+                    <TextView
+                        android:id="@+id/setup_card_progress"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:text="@string/action_allow" />
+                        android:layout_height="@dimen/touch_min"
+                        android:gravity="center"
+                        android:importantForAccessibility="no"
+                        android:paddingStart="@dimen/space_2"
+                        android:paddingEnd="@dimen/space_1"
+                        android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue"
+                        android:textColor="?attr/vtAccent" />
                 </LinearLayout>
 
                 <Button
@@ -217,7 +185,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_3"
-                    android:text="@string/action_allow_mic" />
+                    android:text="@string/action_finish_setup" />
 
                 <Button
                     android:id="@+id/stop_action"
@@ -286,68 +254,6 @@
                         android:paddingStart="@dimen/space_2"
                         android:paddingEnd="@dimen/space_1"
                         android:text="@string/action_open_settings"
-                        android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue"
-                        android:textColor="?attr/vtAccent" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/background_restricted_warning"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_2"
-                    android:background="@drawable/bg_wash_pill"
-                    android:clickable="true"
-                    android:contentDescription="@string/background_warning_a11y"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground"
-                    android:gravity="center_vertical"
-                    android:minHeight="@dimen/touch_min"
-                    android:orientation="horizontal"
-                    android:paddingStart="@dimen/space_3"
-                    android:paddingTop="@dimen/space_2"
-                    android:paddingEnd="@dimen/space_2"
-                    android:paddingBottom="@dimen/space_2">
-
-                    <ImageView
-                        android:layout_width="@dimen/icon_row"
-                        android:layout_height="@dimen/icon_row"
-                        android:contentDescription="@null"
-                        android:importantForAccessibility="no"
-                        android:src="@drawable/ic_warning"
-                        app:tint="?attr/vtWarning" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/space_2"
-                        android:layout_weight="1"
-                        android:importantForAccessibility="no"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/background_warning_title"
-                            android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue"
-                            android:textColor="?attr/vtWarningText" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="@string/background_warning_body"
-                            android:textAppearance="@style/TextAppearance.VoiceTyping.Caption"
-                            android:textColor="?attr/vtInk" />
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="@dimen/touch_min"
-                        android:gravity="center"
-                        android:importantForAccessibility="no"
-                        android:paddingStart="@dimen/space_2"
-                        android:paddingEnd="@dimen/space_1"
-                        android:text="@string/action_open"
                         android:textAppearance="@style/TextAppearance.VoiceTyping.StatusValue"
                         android:textColor="?attr/vtAccent" />
                 </LinearLayout>

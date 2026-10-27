@@ -16,7 +16,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
-import androidx.core.net.toUri
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 
@@ -31,12 +30,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var signalRail: SignalRailView
     private lateinit var readinessIcon: ImageView
     private lateinit var readinessHeadline: TextView
-    private lateinit var micIcon: ImageView
-    private lateinit var micStatus: TextView
-    private lateinit var micAction: Button
-    private lateinit var overlayIcon: ImageView
-    private lateinit var overlayStatus: TextView
-    private lateinit var overlayAction: Button
+    private lateinit var setupCard: View
+    private lateinit var setupCardIcon: ImageView
+    private lateinit var setupCardBody: TextView
+    private lateinit var setupCardProgress: TextView
     private lateinit var primaryAction: Button
     private lateinit var stopAction: Button
     private lateinit var modeSummary: TextView
@@ -44,7 +41,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var privacyBody: TextView
     private lateinit var privacyChevron: ImageView
     private lateinit var apiKeyMissingWarning: View
-    private lateinit var backgroundRestrictedWarning: View
     private lateinit var sandboxHelper: TextView
     private var privacyExpanded = false
     private var appliedTheme = AppTheme.AMBER
@@ -59,12 +55,10 @@ class MainActivity : AppCompatActivity() {
         signalRail = findViewById(R.id.signal_rail)
         readinessIcon = findViewById(R.id.readiness_icon)
         readinessHeadline = findViewById(R.id.readiness_headline)
-        micIcon = findViewById(R.id.mic_icon)
-        micStatus = findViewById(R.id.mic_status)
-        micAction = findViewById(R.id.mic_action)
-        overlayIcon = findViewById(R.id.overlay_icon)
-        overlayStatus = findViewById(R.id.overlay_status)
-        overlayAction = findViewById(R.id.overlay_action)
+        setupCard = findViewById(R.id.setup_card)
+        setupCardIcon = findViewById(R.id.setup_card_icon)
+        setupCardBody = findViewById(R.id.setup_card_body)
+        setupCardProgress = findViewById(R.id.setup_card_progress)
         primaryAction = findViewById(R.id.primary_action)
         stopAction = findViewById(R.id.stop_action)
         modeSummary = findViewById(R.id.mode_summary)
@@ -72,16 +66,13 @@ class MainActivity : AppCompatActivity() {
         privacyBody = findViewById(R.id.privacy_body)
         privacyChevron = findViewById(R.id.privacy_chevron)
         apiKeyMissingWarning = findViewById(R.id.api_key_missing_warning)
-        backgroundRestrictedWarning = findViewById(R.id.background_restricted_warning)
         sandboxHelper = findViewById(R.id.sandbox_helper)
 
         findViewById<ImageButton>(R.id.open_settings).setOnClickListener { openSettings() }
         findViewById<LinearLayout>(R.id.mode_summary_row).setOnClickListener { openSettings() }
         apiKeyMissingWarning.setOnClickListener { openSettings() }
-        backgroundRestrictedWarning.setOnClickListener { BackgroundAccess.openBatterySettings(this) }
+        setupCard.setOnClickListener { openSetup() }
         findViewById<LinearLayout>(R.id.privacy_row).setOnClickListener { togglePrivacy() }
-        micAction.setOnClickListener { requestMicrophone() }
-        overlayAction.setOnClickListener { openOverlaySettings() }
         stopAction.setOnClickListener { stopBubble() }
 
         applyEdgeToEdgeInsets()
@@ -98,15 +89,16 @@ class MainActivity : AppCompatActivity() {
             return
         }
         refresh()
+        openSetupOnFirstRun()
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray,
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_MIC) refresh()
+    /**
+     * Nothing works until the checklist is done, so a first run opens it instead of leaving the
+     * user to find it. Marked seen by [SetupActivity] itself, so this happens exactly once.
+     */
+    private fun openSetupOnFirstRun() {
+        if (settingsStore.readSetupSeen()) return
+        openSetup()
     }
 
     private fun applyEdgeToEdgeInsets() {
@@ -130,41 +122,46 @@ class MainActivity : AppCompatActivity() {
     private fun readReadiness(): Readiness {
         val settings = settingsStore.read()
         return Readiness(
-            micGranted = checkSelfPermission(Manifest.permission.RECORD_AUDIO) ==
-                PackageManager.PERMISSION_GRANTED,
-            overlayGranted = Settings.canDrawOverlays(this),
             serviceRunning = OverlayBubbleService.isRunning,
             resultCopied = ClipboardStateStore.read() != null,
             mode = settings.recordingMode,
             apiKeySaved = settings.apiKey.isNotBlank(),
+            setup = SetupStatus(
+                micGranted = checkSelfPermission(Manifest.permission.RECORD_AUDIO) ==
+                    PackageManager.PERMISSION_GRANTED,
+                overlayGranted = Settings.canDrawOverlays(this),
+                batteryExempt = BackgroundAccess.isBatteryExempt(this),
+                hasVendorAutostart = BackgroundAccess.hasVendorAutostartList(),
+                autostartConfirmed = settingsStore.readAutostartConfirmed(),
+            ),
         )
     }
 
     /** Everything the screen is allowed to claim, read once so the views cannot disagree. */
     data class Readiness(
-        val micGranted: Boolean,
-        val overlayGranted: Boolean,
         val serviceRunning: Boolean,
         val resultCopied: Boolean,
         val mode: RecordingMode,
         val apiKeySaved: Boolean = false,
+        val setup: SetupStatus = SetupStatus(
+            micGranted = true,
+            overlayGranted = true,
+            batteryExempt = true,
+            hasVendorAutostart = false,
+            autostartConfirmed = false,
+        ),
     )
 
     @VisibleForTesting
     fun render(readiness: Readiness) {
-        val ready = readiness.micGranted && readiness.overlayGranted
+        val ready = SetupChecklist.blocking(readiness.setup).isEmpty()
 
-        bindPermissionRow(micIcon, micStatus, micAction, readiness.micGranted)
-        bindPermissionRow(overlayIcon, overlayStatus, overlayAction, readiness.overlayGranted)
+        bindSetupCard(readiness.setup)
         apiKeyMissingWarning.visibility = if (readiness.apiKeySaved) View.GONE else View.VISIBLE
-        // Read live rather than from readiness: the user can change this in system settings
-        // and come straight back, and onResume is the only signal we get.
-        backgroundRestrictedWarning.visibility =
-            if (BackgroundAccess.isBatteryExempt(this)) View.GONE else View.VISIBLE
 
         signalRail.render(railStates(ready, readiness.resultCopied))
         bindHeadline(ready, readiness.serviceRunning, readiness.resultCopied)
-        bindPrimaryAction(readiness.micGranted, readiness.overlayGranted, readiness.serviceRunning)
+        bindPrimaryAction(ready, readiness.serviceRunning)
 
         stopAction.visibility = if (readiness.serviceRunning) View.VISIBLE else View.GONE
         modeSummary.text = getString(R.string.mode_summary, getString(modeLabel(readiness.mode)))
@@ -216,13 +213,42 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun bindPermissionRow(icon: ImageView, status: TextView, action: Button, granted: Boolean) {
-        status.setText(if (granted) R.string.perm_ready else R.string.perm_missing)
-        status.setTextColor(if (granted) getColor(R.color.success_mint) else themeColor(R.attr.vtWarningText))
-        icon.imageTintList = android.content.res.ColorStateList.valueOf(
-            if (granted) themeColor(R.attr.vtInk) else themeColor(R.attr.vtWarning),
+    /**
+     * The card is the whole checklist in one line: hidden once nothing is left, and warning
+     * coloured only while something the floating mic cannot run without is missing. Autostart
+     * sitting unconfirmed is worth saying, but it is not a reason to shout.
+     */
+    private fun bindSetupCard(status: SetupStatus) {
+        val outstanding = SetupChecklist.outstanding(status)
+        if (outstanding.isEmpty()) {
+            setupCard.visibility = View.GONE
+            return
+        }
+        val blocking = SetupChecklist.blocking(status).isNotEmpty()
+        val tint = if (blocking) themeColor(R.attr.vtWarning) else themeColor(R.attr.vtAccent)
+        val names = outstanding.joinToString(", ") { getString(setupLabel(it)) }
+
+        setupCard.visibility = View.VISIBLE
+        setupCardIcon.setImageResource(if (blocking) R.drawable.ic_warning else R.drawable.ic_info)
+        setupCardIcon.imageTintList = android.content.res.ColorStateList.valueOf(tint)
+        setupCardBody.text = getString(R.string.setup_card_body, names)
+        setupCardProgress.text = getString(
+            R.string.setup_progress,
+            SetupChecklist.doneCount(status),
+            SetupChecklist.requirements(status).size,
         )
-        action.visibility = if (granted) View.GONE else View.VISIBLE
+        setupCard.contentDescription = getString(
+            R.string.setup_card_a11y,
+            getString(R.string.setup_card_title),
+            setupCardBody.text,
+        )
+    }
+
+    private fun setupLabel(requirement: SetupRequirement) = when (requirement) {
+        SetupRequirement.MICROPHONE -> R.string.setup_mic_title
+        SetupRequirement.OVERLAY -> R.string.setup_overlay_title
+        SetupRequirement.BATTERY -> R.string.setup_battery_title
+        SetupRequirement.AUTOSTART -> R.string.setup_autostart_title
     }
 
     private fun bindHeadline(ready: Boolean, running: Boolean, copied: Boolean) {
@@ -256,25 +282,14 @@ class MainActivity : AppCompatActivity() {
         readinessIcon.imageTintList = android.content.res.ColorStateList.valueOf(tint)
     }
 
-    private fun bindPrimaryAction(micGranted: Boolean, overlayGranted: Boolean, running: Boolean) {
-        when {
-            running -> primaryAction.visibility = View.GONE
-            !micGranted -> {
-                primaryAction.visibility = View.VISIBLE
-                primaryAction.setText(R.string.action_allow_mic)
-                primaryAction.setOnClickListener { requestMicrophone() }
-            }
-            !overlayGranted -> {
-                primaryAction.visibility = View.VISIBLE
-                primaryAction.setText(R.string.action_allow_overlay)
-                primaryAction.setOnClickListener { openOverlaySettings() }
-            }
-            else -> {
-                primaryAction.visibility = View.VISIBLE
-                primaryAction.setText(R.string.action_start_bubble)
-                primaryAction.setOnClickListener { startBubble() }
-            }
+    private fun bindPrimaryAction(ready: Boolean, running: Boolean) {
+        if (running) {
+            primaryAction.visibility = View.GONE
+            return
         }
+        primaryAction.visibility = View.VISIBLE
+        primaryAction.setText(if (ready) R.string.action_start_bubble else R.string.action_finish_setup)
+        primaryAction.setOnClickListener { if (ready) startBubble() else openSetup() }
     }
 
     private fun modeLabel(mode: RecordingMode) =
@@ -293,27 +308,15 @@ class MainActivity : AppCompatActivity() {
         ) + ", " + getString(if (privacyExpanded) R.string.a11y_collapse else R.string.a11y_expand)
     }
 
-    private fun requestMicrophone() {
-        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), REQUEST_MIC)
-        } else {
-            refresh()
-        }
-    }
-
-    private fun openOverlaySettings() {
-        startActivity(
-            Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, "package:$packageName".toUri()),
-        )
+    private fun openSetup() {
+        startActivity(Intent(this, SetupActivity::class.java))
     }
 
     private fun startBubble() {
-        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            requestMicrophone()
-            return
-        }
-        if (!Settings.canDrawOverlays(this)) {
-            openOverlaySettings()
+        // The checklist owns every permission prompt, so a tap that arrives before it is done
+        // goes there rather than raising a dialog this screen would have to handle too.
+        if (SetupChecklist.blocking(readReadiness().setup).isNotEmpty()) {
+            openSetup()
             return
         }
         startForegroundService(
@@ -329,9 +332,5 @@ class MainActivity : AppCompatActivity() {
 
     private fun openSettings() {
         startActivity(Intent(this, SettingsActivity::class.java))
-    }
-
-    companion object {
-        private const val REQUEST_MIC = 41
     }
 }

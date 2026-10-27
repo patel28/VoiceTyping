@@ -1,9 +1,12 @@
 package com.voicetyping.directtest
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.os.Bundle
+import android.provider.Settings
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.method.HideReturnsTransformationMethod
@@ -40,9 +43,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var themeGroup: RadioGroup
     private lateinit var themeLagoonOption: RadioButton
     private lateinit var themeSignalOption: RadioButton
-    private lateinit var batteryStatus: TextView
-    private lateinit var batteryAction: Button
-    private lateinit var autostartRow: LinearLayout
+    private lateinit var setupStatus: TextView
     private lateinit var apiKeyField: EditText
     private lateinit var modelField: EditText
     private lateinit var visibilityButton: Button
@@ -70,9 +71,7 @@ class SettingsActivity : AppCompatActivity() {
         themeGroup = findViewById(R.id.theme_group)
         themeLagoonOption = findViewById(R.id.theme_lagoon)
         themeSignalOption = findViewById(R.id.theme_signal)
-        batteryStatus = findViewById(R.id.background_battery_status)
-        batteryAction = findViewById(R.id.background_battery_action)
-        autostartRow = findViewById(R.id.background_autostart_row)
+        setupStatus = findViewById(R.id.background_setup_status)
         apiKeyField = findViewById(R.id.api_key_field)
         modelField = findViewById(R.id.model_field)
         visibilityButton = findViewById(R.id.api_key_visibility)
@@ -136,8 +135,9 @@ class SettingsActivity : AppCompatActivity() {
         findViewById<LinearLayout>(R.id.advanced_row).setOnClickListener { toggleAdvanced() }
         findViewById<Button>(R.id.save_action).setOnClickListener { save() }
 
-        batteryAction.setOnClickListener { BackgroundAccess.openBatterySettings(this) }
-        bindAutostartRow()
+        findViewById<LinearLayout>(R.id.background_setup_row).setOnClickListener {
+            startActivity(Intent(this, SetupActivity::class.java))
+        }
 
         applyEdgeToEdgeInsets()
         applyAdvancedExpansion()
@@ -145,29 +145,32 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        bindBatteryRow()
+        bindSetupRow()
     }
 
-    private fun bindBatteryRow() {
-        val exempt = BackgroundAccess.isBatteryExempt(this)
-        batteryStatus.setText(
-            if (exempt) R.string.background_battery_exempt else R.string.background_battery_restricted,
+    /** How much of the checklist is left, read on every resume because the setup screen changes it. */
+    private fun bindSetupRow() {
+        val status = SetupStatus(
+            micGranted = checkSelfPermission(Manifest.permission.RECORD_AUDIO) ==
+                PackageManager.PERMISSION_GRANTED,
+            overlayGranted = Settings.canDrawOverlays(this),
+            batteryExempt = BackgroundAccess.isBatteryExempt(this),
+            hasVendorAutostart = BackgroundAccess.hasVendorAutostartList(),
+            autostartConfirmed = store.readAutostartConfirmed(),
         )
-        batteryStatus.setTextColor(
-            if (exempt) getColor(R.color.success_mint) else themeColor(R.attr.vtWarningText),
+        val complete = SetupChecklist.isComplete(status)
+        setupStatus.text = if (complete) {
+            getString(R.string.settings_setup_row_detail)
+        } else {
+            getString(
+                R.string.setup_progress,
+                SetupChecklist.doneCount(status),
+                SetupChecklist.requirements(status).size,
+            )
+        }
+        setupStatus.setTextColor(
+            if (complete) themeColor(R.attr.vtInkMuted) else themeColor(R.attr.vtWarningText),
         )
-        batteryAction.visibility = if (exempt) View.GONE else View.VISIBLE
-    }
-
-    /** Nothing can read the vendor's autostart setting, so the row only ever offers to open it. */
-    private fun bindAutostartRow() {
-        if (!BackgroundAccess.hasVendorAutostartList()) {
-            autostartRow.visibility = View.GONE
-            return
-        }
-        findViewById<Button>(R.id.background_autostart_action).setOnClickListener {
-            BackgroundAccess.openAutostartSettings(this)
-        }
     }
 
     private fun applyEdgeToEdgeInsets() {
